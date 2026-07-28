@@ -239,8 +239,22 @@ export function AppShell({ view, watchId, profileAddress }: Props) {
                 </Link>
               ))}
             </nav>
-            <div className="relative mt-0 flex items-center gap-2 lg:mt-8 lg:block">
-            <button className="button-secondary px-2.5 lg:mb-2" onClick={toggleTheme} aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}>
+          </div>
+          <nav className="flex gap-1 overflow-x-auto border-t border-[var(--border-soft)] px-4 py-2 lg:hidden">
+            {nav.map(([label, href]) => (
+              <Link key={href} href={href} className={`shrink-0 px-3 py-2 text-sm font-bold ${isActive(view, href) ? "bg-[var(--primary-muted)] text-[var(--primary-muted-ink)]" : "text-[var(--muted)]"}`}>
+                {label}
+              </Link>
+            ))}
+          </nav>
+        </aside>
+
+        <div>
+      <header className="border-b border-[var(--border-soft)] bg-[var(--surface)] px-3 py-3 lg:px-5">
+        <div className="mx-auto flex max-w-[78rem] items-center justify-between gap-3">
+          <p className="hidden text-xs font-bold uppercase text-[var(--muted)] sm:block">StudioNet recall evidence desk</p>
+          <div className="relative ml-auto flex items-center gap-2">
+            <button className="button-secondary px-2.5" onClick={toggleTheme} aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}>
               {theme === "dark" ? <Sun size={16} /> : <Moon size={16} />}
             </button>
             <button className="button-primary" onClick={() => setWallet((current) => ({ ...current, menuOpen: !current.menuOpen }))}>
@@ -249,7 +263,7 @@ export function AppShell({ view, watchId, profileAddress }: Props) {
               <ChevronDown size={16} />
             </button>
             {wallet.menuOpen ? (
-              <div className="absolute right-0 z-20 mt-2 w-80 border border-[var(--border-soft)] bg-[var(--surface)] p-3 shadow-lg lg:left-0 lg:right-auto">
+              <div className="absolute right-0 top-full z-20 mt-2 w-80 border border-[var(--border-soft)] bg-[var(--surface)] p-3 shadow-lg">
                 <p className="label">{wallet.mode === "browser" ? "Browser wallet" : wallet.mode === "injected" ? "Injected wallet" : "No wallet"}</p>
                 <p className={`mt-1 text-sm ${wallet.address ? "break-all font-mono" : "leading-6 text-[var(--muted)]"}`}>{wallet.address ?? "Connect to create, report, and verify watches."}</p>
                 <div className="mt-3 grid gap-2">
@@ -278,18 +292,9 @@ export function AppShell({ view, watchId, profileAddress }: Props) {
                 </div>
               </div>
             ) : null}
-            </div>
           </div>
-          <nav className="flex gap-1 overflow-x-auto border-t border-[var(--border-soft)] px-4 py-2 lg:hidden">
-            {nav.map(([label, href]) => (
-              <Link key={href} href={href} className={`shrink-0 px-3 py-2 text-sm font-bold ${isActive(view, href) ? "bg-[var(--primary-muted)] text-[var(--primary-muted-ink)]" : "text-[var(--muted)]"}`}>
-                {label}
-              </Link>
-            ))}
-          </nav>
-        </aside>
-
-        <div>
+        </div>
+      </header>
       {wallet.needsAck ? (
         <section className="border-b border-[var(--warning)] bg-[var(--warning-bg)] px-4 py-3">
           <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
