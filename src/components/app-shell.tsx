@@ -230,7 +230,7 @@ export function AppShell({ view, watchId, profileAddress }: Props) {
             {wallet.menuOpen ? (
               <div className="absolute right-0 z-20 mt-2 w-80 border border-[#ded8cd] bg-white p-3 shadow-lg lg:left-0 lg:right-auto">
                 <p className="label">{wallet.mode === "browser" ? "Browser wallet" : wallet.mode === "injected" ? "Injected wallet" : "No wallet"}</p>
-                <p className="mt-1 break-all font-mono text-sm">{wallet.address ?? "Connect to create, report, and verify watches."}</p>
+                <p className={`mt-1 text-sm ${wallet.address ? "break-all font-mono" : "leading-6 text-[#5f574b]"}`}>{wallet.address ?? "Connect to create, report, and verify watches."}</p>
                 <div className="mt-3 grid gap-2">
                   <button className="button-secondary" onClick={useInjectedWallet}>
                     <ShieldCheck size={16} /> Use injected
@@ -343,7 +343,7 @@ function Overview({ watches, loading }: ShellBits) {
   return (
     <div className="grid gap-6">
       <section className="grid gap-0 overflow-hidden border border-[#ded8cd] bg-[#fffefd] xl:grid-cols-[minmax(0,1fr)_22rem]">
-        <div className="border-b border-[#ded8cd] p-6 md:p-8 xl:border-b-0 xl:border-r">
+        <div className="border-b border-[#ded8cd] p-6 md:p-8 xl:border-b-0">
           <p className="label text-[#0f766e]">Public recall bounties</p>
           <h1 className="display mt-4 max-w-4xl text-5xl font-bold leading-[1.02] md:text-7xl">Find dangerous recalled products before someone buys them.</h1>
           <p className="mt-5 max-w-2xl text-lg leading-8 text-[#4f473c]">
@@ -354,7 +354,7 @@ function Overview({ watches, loading }: ShellBits) {
             <Link className="button-secondary" href="/scout"><FileSearch size={18} /> Submit evidence</Link>
           </div>
         </div>
-        <div className="grid content-start">
+        <div className="grid content-start divide-y divide-[#ded8cd]">
           <Metric label="Open bounties" value={loading ? "..." : String(open)} />
           <Metric label="Awaiting consensus" value={loading ? "..." : String(reported)} />
           <Metric label="Verified matches" value={loading ? "..." : String(matched)} />
