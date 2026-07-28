@@ -220,27 +220,27 @@ export function AppShell({ view, watchId, profileAddress }: Props) {
 
   return (
     <div className="min-h-screen bg-[var(--app-bg)] text-[var(--ink)]">
-      <div className="min-h-screen lg:grid lg:grid-cols-[14.5rem_minmax(0,1fr)]">
+      <div className="min-h-screen lg:grid lg:grid-cols-[12.5rem_minmax(0,1fr)]">
         <aside className="border-b border-[var(--border-soft)] bg-[var(--surface)] lg:sticky lg:top-0 lg:h-screen lg:border-b-0 lg:border-r">
-          <div className="flex items-center justify-between gap-4 px-4 py-4 lg:block lg:px-4 lg:py-5">
+          <div className="flex items-center justify-between gap-4 px-4 py-4 lg:block lg:px-3 lg:py-4">
             <Link href="/" className="flex items-center gap-3">
-              <span className="grid size-9 place-items-center border border-[var(--primary)] bg-[var(--primary-muted)] text-[var(--primary-muted-ink)]">
-                <PackageSearch size={20} />
+              <span className="grid size-8 place-items-center border border-[var(--primary)] bg-[var(--primary-muted)] text-[var(--primary-muted-ink)]">
+                <PackageSearch size={18} />
               </span>
               <span>
-                <span className="block text-lg font-black">RecallScout</span>
-                <span className="hidden text-[11px] font-bold uppercase text-[var(--muted)] lg:block">Safety bounty ledger</span>
+                <span className="block text-base font-black">RecallScout</span>
+                <span className="hidden text-[10px] font-bold uppercase text-[var(--muted)] lg:block">Safety bounty ledger</span>
               </span>
             </Link>
-            <nav className="hidden gap-1 lg:mt-8 lg:grid">
+            <nav className="hidden gap-1 lg:mt-6 lg:grid">
               {nav.map(([label, href]) => (
-                <Link key={href} href={href} className={`border-l-4 px-3 py-2.5 text-sm font-bold ${isActive(view, href) ? "border-[var(--primary)] bg-[var(--primary-muted)] text-[var(--primary-muted-ink)]" : "border-transparent text-[var(--muted)] hover:bg-[var(--surface-muted)]"}`}>
+                <Link key={href} href={href} className={`border-l-4 px-2.5 py-2 text-sm font-bold ${isActive(view, href) ? "border-[var(--primary)] bg-[var(--primary-muted)] text-[var(--primary-muted-ink)]" : "border-transparent text-[var(--muted)] hover:bg-[var(--surface-muted)]"}`}>
                   {label}
                 </Link>
               ))}
             </nav>
             <div className="relative mt-0 flex items-center gap-2 lg:mt-8 lg:block">
-            <button className="button-secondary min-h-11 px-3 lg:mb-2" onClick={toggleTheme} aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}>
+            <button className="button-secondary px-2.5 lg:mb-2" onClick={toggleTheme} aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}>
               {theme === "dark" ? <Sun size={16} /> : <Moon size={16} />}
             </button>
             <button className="button-primary" onClick={() => setWallet((current) => ({ ...current, menuOpen: !current.menuOpen }))}>
@@ -301,7 +301,7 @@ export function AppShell({ view, watchId, profileAddress }: Props) {
         </section>
       ) : null}
 
-      <main className="mx-auto max-w-[88rem] px-4 py-5 lg:px-6 lg:py-6">
+      <main className="mx-auto max-w-[78rem] px-3 py-4 lg:px-5 lg:py-5">
         <PendingTransactions txs={txs} />
         {error ? <ErrorBox message={error} /> : null}
         {view === "overview" ? <Overview {...common} /> : null}
@@ -363,14 +363,14 @@ function Overview({ watches, loading }: ShellBits) {
   const matched = watches.filter((w) => w.status === "MATCHED").length;
   return (
     <div className="grid gap-6">
-      <section className="grid gap-0 overflow-hidden border border-[var(--border-soft)] bg-[var(--surface)] xl:grid-cols-[minmax(0,1fr)_18rem]">
-        <div className="border-b border-[var(--border-soft)] p-5 md:p-6 xl:border-b-0">
+      <section className="grid gap-0 overflow-hidden border border-[var(--border-soft)] bg-[var(--surface)] xl:grid-cols-[minmax(0,1fr)_15rem]">
+        <div className="border-b border-[var(--border-soft)] p-4 md:p-5 xl:border-b-0">
           <p className="label text-[var(--primary-muted-ink)]">Public recall bounties</p>
-          <h1 className="display mt-4 max-w-4xl text-4xl font-bold leading-[1.02] md:text-5xl 2xl:text-6xl">Find dangerous recalled products before someone buys them.</h1>
-          <p className="mt-4 max-w-2xl text-base leading-7 text-[var(--muted)]">
+          <h1 className="display mt-4 max-w-4xl text-3xl font-bold leading-[1.04] md:text-4xl 2xl:text-5xl">Find dangerous recalled products before someone buys them.</h1>
+          <p className="mt-3 max-w-xl text-sm leading-6 text-[var(--muted)]">
             Sponsors fund product safety watches. Scouts submit public product evidence and official recall sources. GenLayer validators fetch the pages and decide whether the product matches the recall.
           </p>
-          <div className="mt-5 flex flex-wrap gap-3">
+          <div className="mt-4 flex flex-wrap gap-2">
             <Link className="button-primary" href="/sponsor"><Plus size={18} /> Fund a watch</Link>
             <Link className="button-secondary" href="/scout"><FileSearch size={18} /> Submit evidence</Link>
           </div>
@@ -400,9 +400,9 @@ type ShellBits = {
 
 function Metric({ label, value }: { label: string; value: string }) {
   return (
-    <div className="bg-[var(--surface-muted)] p-4">
+    <div className="bg-[var(--surface-muted)] p-3">
       <p className="label">{label}</p>
-      <p className="display mt-2 text-4xl font-bold">{value}</p>
+      <p className="display mt-2 text-3xl font-bold">{value}</p>
     </div>
   );
 }
@@ -410,10 +410,10 @@ function Metric({ label, value }: { label: string; value: string }) {
 function WatchesView({ watches, loading, refresh }: ShellBits) {
   return (
     <section className="border border-[var(--border-soft)] bg-[var(--surface)]">
-      <div className="flex flex-col gap-3 border-b border-[var(--border-soft)] p-5 md:flex-row md:items-end md:justify-between">
+      <div className="flex flex-col gap-3 border-b border-[var(--border-soft)] p-4 md:flex-row md:items-end md:justify-between">
         <div>
           <p className="label">Public board</p>
-          <h1 className="display mt-2 text-4xl font-bold">Recall watches</h1>
+          <h1 className="display mt-2 text-3xl font-bold">Recall watches</h1>
         </div>
         <button className="button-secondary" onClick={refresh}><RefreshCw size={16} /> Refresh</button>
       </div>
@@ -443,13 +443,13 @@ function SponsorView({ busy, getWriteClient, trackWrite }: ShellBits) {
     });
   }
   return (
-    <section className="grid gap-0 border border-[var(--border-soft)] bg-[var(--surface)] lg:grid-cols-[17rem_minmax(0,1fr)]">
-      <div className="border-b border-[var(--border-soft)] bg-[var(--surface-muted)] p-6 lg:border-b-0 lg:border-r">
+    <section className="grid gap-0 border border-[var(--border-soft)] bg-[var(--surface)] lg:grid-cols-[14rem_minmax(0,1fr)]">
+      <div className="border-b border-[var(--border-soft)] bg-[var(--surface-muted)] p-5 lg:border-b-0 lg:border-r">
       <p className="label">Sponsor</p>
-      <h1 className="display mt-2 text-4xl font-bold leading-tight">Fund a recall watch</h1>
+      <h1 className="display mt-2 text-3xl font-bold leading-tight">Fund a recall watch</h1>
       <p className="mt-4 text-sm leading-6 text-[var(--muted)]">Create the bounty first. Evidence and consensus happen later, so nobody waits through a slow review while filling out this form.</p>
       </div>
-      <div className="grid gap-4 p-6">
+      <div className="grid gap-3 p-5">
         <Input label="Title" value={form.title} onChange={(title) => setForm({ ...form, title })} />
         <Input label="Category" value={form.category} onChange={(category) => setForm({ ...form, category })} />
         <Textarea label="Match criteria" value={form.criteria} onChange={(criteria) => setForm({ ...form, criteria })} />
@@ -465,9 +465,9 @@ function SponsorView({ busy, getWriteClient, trackWrite }: ShellBits) {
 function ScoutView(props: ShellBits) {
   const open = props.watches.filter((w) => w.status === "OPEN" || w.status === "UNKNOWN");
   return (
-    <section className="border border-[var(--border-soft)] bg-[var(--surface)] p-6">
+    <section className="border border-[var(--border-soft)] bg-[var(--surface)] p-5">
       <p className="label">Scout desk</p>
-      <h1 className="display mt-2 text-4xl font-bold">Submit recall evidence</h1>
+      <h1 className="display mt-2 text-3xl font-bold">Submit recall evidence</h1>
       <WatchesList watches={open} loading={props.loading} empty="No open watches are ready for scouts." action={(watch) => <SubmitBox watch={watch} {...props} />} />
     </section>
   );
@@ -502,9 +502,9 @@ function ReviewView(props: ShellBits) {
   const ready = props.watches.filter((w) => w.status === "REPORTED");
   const unknown = props.watches.filter((w) => w.status === "UNKNOWN");
   return (
-    <section className="border border-[var(--border-soft)] bg-[var(--surface)] p-6">
+    <section className="border border-[var(--border-soft)] bg-[var(--surface)] p-5">
       <p className="label">Permissionless review</p>
-      <h1 className="display mt-2 text-4xl font-bold">Consensus queue</h1>
+      <h1 className="display mt-2 text-3xl font-bold">Consensus queue</h1>
       <div className="mt-5 grid border border-[var(--border-soft)] md:grid-cols-3 md:divide-x md:divide-[var(--border-soft)]">
         <Metric label="Ready" value={String(ready.length)} />
         <Metric label="Unknown" value={String(unknown.length)} />
@@ -546,9 +546,9 @@ function ReviewActions({ watch, busy, getWriteClient, trackWrite, activeAddress 
 
 function HistoryView({ watches, loading, refresh }: { watches: WatchRecord[]; loading: boolean; refresh: () => Promise<void> }) {
   return (
-    <section className="border border-[var(--border-soft)] bg-[var(--surface)] p-6">
+    <section className="border border-[var(--border-soft)] bg-[var(--surface)] p-5">
       <div className="flex items-center justify-between">
-        <h1 className="display text-4xl font-bold">Your watch history</h1>
+        <h1 className="display text-3xl font-bold">Your watch history</h1>
         <button className="button-secondary" onClick={refresh}><RefreshCw size={16} /> Refresh</button>
       </div>
       <WatchesList watches={watches} loading={loading} empty="Connect the wallet used as sponsor or scout to see your history." />
@@ -558,11 +558,11 @@ function HistoryView({ watches, loading, refresh }: { watches: WatchRecord[]; lo
 
 function WatchDetail({ watch, loading, ...props }: ShellBits & { watch?: WatchRecord }) {
   if (loading) return <Skeleton />;
-  if (!watch) return <section className="panel p-6"><h1 className="display text-4xl font-bold">Watch not found</h1></section>;
+  if (!watch) return <section className="panel p-5"><h1 className="display text-3xl font-bold">Watch not found</h1></section>;
   return (
-    <section className="border border-[var(--border-soft)] bg-[var(--surface)] p-6">
+    <section className="border border-[var(--border-soft)] bg-[var(--surface)] p-5">
       <p className="label">{watch.watch_id}</p>
-      <h1 className="display mt-2 text-4xl font-bold">{watch.title}</h1>
+      <h1 className="display mt-2 text-3xl font-bold">{watch.title}</h1>
       <div className="mt-5 grid border border-[var(--border-soft)] md:grid-cols-3 md:divide-x md:divide-[var(--border-soft)]">
         <Metric label="Status" value={watch.status} />
         <Metric label="Bounty" value={formatGen(watch.bounty)} />
@@ -578,7 +578,7 @@ function WatchDetail({ watch, loading, ...props }: ShellBits & { watch?: WatchRe
       </div>
       <div className="mt-6 border-t border-[var(--border-muted)] pt-5">
         <p className="label">Consensus reasoning</p>
-        <p className="mt-2 text-lg">{watch.reason || "No consensus decision yet."}</p>
+        <p className="mt-2 text-base">{watch.reason || "No consensus decision yet."}</p>
       </div>
       <ReviewActions watch={watch} loading={loading} {...props} />
     </section>
@@ -589,9 +589,9 @@ function ProfileView({ address, watches }: { address?: string; watches: WatchRec
   const lower = address?.toLowerCase();
   const scoped = lower ? watches.filter((w) => w.sponsor.toLowerCase() === lower || w.scout.toLowerCase() === lower) : [];
   return (
-    <section className="border border-[var(--border-soft)] bg-[var(--surface)] p-6">
+    <section className="border border-[var(--border-soft)] bg-[var(--surface)] p-5">
       <p className="label">Profile</p>
-      <h1 className="display mt-2 break-all text-4xl font-bold">{address}</h1>
+      <h1 className="display mt-2 break-all text-3xl font-bold">{address}</h1>
       <WatchesList watches={scoped} loading={false} empty="No watches found for this address in the loaded page." />
     </section>
   );
@@ -599,7 +599,7 @@ function ProfileView({ address, watches }: { address?: string; watches: WatchRec
 
 function WatchesList({ watches, loading, empty, action }: { watches: WatchRecord[]; loading: boolean; empty: string; action?: (watch: WatchRecord) => React.ReactNode }) {
   if (loading) return <Skeleton />;
-  if (!watches.length) return <div className="mt-6 border border-dashed border-[var(--border-soft)] p-6 text-[var(--muted)]">{empty}</div>;
+  if (!watches.length) return <div className="mt-5 border border-dashed border-[var(--border-soft)] p-5 text-[var(--muted)]">{empty}</div>;
   return (
     <div className="mt-6 border-y border-[var(--border-soft)]">
       {watches.map((watch) => (
@@ -662,4 +662,6 @@ declare global {
     };
   }
 }
+
+
 
