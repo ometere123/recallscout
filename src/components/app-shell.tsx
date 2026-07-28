@@ -321,7 +321,7 @@ export function AppShell({ view, watchId, profileAddress }: Props) {
         {view === "sponsor" ? <SponsorView {...common} /> : null}
         {view === "scout" ? <ScoutView {...common} /> : null}
         {view === "review" ? <ReviewView {...common} /> : null}
-        {view === "history" ? <HistoryView watches={myWatches} loading={loading} refresh={refresh} /> : null}
+        {view === "history" ? <HistoryView watches={myWatches} loading={loading} refresh={refresh} activeAddress={activeAddress} /> : null}
         {view === "watch" ? <WatchDetail watch={activeWatch} {...common} /> : null}
         {view === "profile" ? <ProfileView address={profileAddress} watches={watches} /> : null}
       </main>
@@ -577,14 +577,17 @@ function ReviewActions({ watch, busy, getWriteClient, trackWrite, activeAddress 
   );
 }
 
-function HistoryView({ watches, loading, refresh }: { watches: WatchRecord[]; loading: boolean; refresh: () => Promise<void> }) {
+function HistoryView({ watches, loading, refresh, activeAddress }: { watches: WatchRecord[]; loading: boolean; refresh: () => Promise<void>; activeAddress?: string }) {
+  const emptyCopy = activeAddress
+    ? "No watch history yet. This wallet has not sponsored or submitted any recall watches."
+    : "Connect the wallet used as sponsor or scout to see your history.";
   return (
     <section className="border border-[var(--border-soft)] bg-[var(--surface)] p-5">
       <div className="flex items-center justify-between">
         <h1 className="display text-3xl font-bold">Your watch history</h1>
         <button className="button-secondary" onClick={refresh}><RefreshCw size={16} /> Refresh</button>
       </div>
-      <WatchesList watches={watches} loading={loading} empty="Connect the wallet used as sponsor or scout to see your history." />
+      <WatchesList watches={watches} loading={loading} empty={emptyCopy} />
     </section>
   );
 }
