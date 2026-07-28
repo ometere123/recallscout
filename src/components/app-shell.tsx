@@ -202,27 +202,33 @@ export function AppShell({ view, watchId, profileAddress }: Props) {
 
   return (
     <div className="min-h-screen bg-[#fbfaf7] text-[#171512]">
-      <header className="border-b border-[#ded8cd] bg-[#fffefd]">
-        <div className="mx-auto flex max-w-7xl items-center gap-6 px-4 py-4">
-          <Link href="/" className="flex items-center gap-2 text-xl font-black">
-            <PackageSearch size={24} />
-            RecallScout
-          </Link>
-          <nav className="hidden flex-1 items-center gap-1 md:flex">
-            {nav.map(([label, href]) => (
-              <Link key={href} href={href} className={`rounded-md px-3 py-2 font-bold ${isActive(view, href) ? "bg-[#d7fff2] text-[#075f58]" : "text-[#5f574b] hover:bg-[#f0ece4]"}`}>
-                {label}
-              </Link>
-            ))}
-          </nav>
-          <div className="relative ml-auto">
+      <div className="min-h-screen lg:grid lg:grid-cols-[18rem_minmax(0,1fr)]">
+        <aside className="border-b border-[#ded8cd] bg-[#fffefd] lg:sticky lg:top-0 lg:h-screen lg:border-b-0 lg:border-r">
+          <div className="flex items-center justify-between gap-4 px-4 py-4 lg:block lg:px-5 lg:py-6">
+            <Link href="/" className="flex items-center gap-3">
+              <span className="grid size-11 place-items-center border border-[#0f766e] bg-[#d7fff2] text-[#075f58]">
+                <PackageSearch size={24} />
+              </span>
+              <span>
+                <span className="block text-xl font-black">RecallScout</span>
+                <span className="hidden text-xs font-bold uppercase text-[#766d61] lg:block">Safety bounty ledger</span>
+              </span>
+            </Link>
+            <nav className="hidden gap-1 lg:mt-10 lg:grid">
+              {nav.map(([label, href]) => (
+                <Link key={href} href={href} className={`border-l-4 px-3 py-3 font-bold ${isActive(view, href) ? "border-[#0f766e] bg-[#d7fff2] text-[#075f58]" : "border-transparent text-[#5f574b] hover:bg-[#f0ece4]"}`}>
+                  {label}
+                </Link>
+              ))}
+            </nav>
+            <div className="relative lg:mt-8">
             <button className="button-primary" onClick={() => setWallet((current) => ({ ...current, menuOpen: !current.menuOpen }))}>
               {wallet.address ? <Check size={18} /> : <Wallet size={18} />}
               {wallet.address ? shortAddress(wallet.address) : "Connect wallet"}
               <ChevronDown size={16} />
             </button>
             {wallet.menuOpen ? (
-              <div className="absolute right-0 z-20 mt-2 w-80 border border-[#ded8cd] bg-white p-3 shadow-lg">
+              <div className="absolute right-0 z-20 mt-2 w-80 border border-[#ded8cd] bg-white p-3 shadow-lg lg:left-0 lg:right-auto">
                 <p className="label">{wallet.mode === "browser" ? "Browser wallet" : wallet.mode === "injected" ? "Injected wallet" : "No wallet"}</p>
                 <p className="mt-1 break-all font-mono text-sm">{wallet.address ?? "Connect to create, report, and verify watches."}</p>
                 <div className="mt-3 grid gap-2">
@@ -251,13 +257,21 @@ export function AppShell({ view, watchId, profileAddress }: Props) {
                 </div>
               </div>
             ) : null}
+            </div>
           </div>
-        </div>
-      </header>
+          <nav className="flex gap-1 overflow-x-auto border-t border-[#ded8cd] px-4 py-2 lg:hidden">
+            {nav.map(([label, href]) => (
+              <Link key={href} href={href} className={`shrink-0 px-3 py-2 text-sm font-bold ${isActive(view, href) ? "bg-[#d7fff2] text-[#075f58]" : "text-[#5f574b]"}`}>
+                {label}
+              </Link>
+            ))}
+          </nav>
+        </aside>
 
+        <div>
       {wallet.needsAck ? (
         <section className="border-b border-amber-300 bg-amber-50 px-4 py-3">
-          <div className="mx-auto flex max-w-7xl flex-col gap-3 md:flex-row md:items-center md:justify-between">
+          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
             <p className="text-sm text-amber-950">
               Browser wallets are stored only in this browser. Clearing site data destroys the key. Use export if you need to keep it.
             </p>
@@ -266,7 +280,7 @@ export function AppShell({ view, watchId, profileAddress }: Props) {
         </section>
       ) : null}
 
-      <main className="mx-auto max-w-7xl px-4 py-8">
+      <main className="px-4 py-6 lg:px-8 lg:py-8">
         <PendingTransactions txs={txs} />
         {error ? <ErrorBox message={error} /> : null}
         {view === "overview" ? <Overview {...common} /> : null}
@@ -278,6 +292,8 @@ export function AppShell({ view, watchId, profileAddress }: Props) {
         {view === "watch" ? <WatchDetail watch={activeWatch} {...common} /> : null}
         {view === "profile" ? <ProfileView address={profileAddress} watches={watches} /> : null}
       </main>
+        </div>
+      </div>
     </div>
   );
 }
@@ -298,11 +314,14 @@ function ErrorBox({ message }: { message: string }) {
 function PendingTransactions({ txs }: { txs: TrackedTx[] }) {
   if (!txs.length) return null;
   return (
-    <section className="panel mb-6 p-5">
-      <h2 className="text-xl font-black">Transactions</h2>
-      <div className="mt-3 grid gap-2">
+    <section className="mb-6 border-y border-[#ded8cd] bg-[#fffefd]">
+      <div className="flex items-center gap-3 border-b border-[#eee7dc] px-4 py-3">
+        <History size={18} />
+        <h2 className="font-black uppercase tracking-wide">Transactions</h2>
+      </div>
+      <div className="divide-y divide-[#eee7dc]">
         {txs.slice(0, 4).map((tx) => (
-          <div key={tx.hash} className="flex items-center justify-between border border-[#eee7dc] p-3">
+          <div key={tx.hash} className="flex items-center justify-between px-4 py-3">
             <div>
               <p className="font-bold">{tx.label}</p>
               <p className="text-sm text-[#766d61]">{tx.status} · {formatUtc(tx.submittedAt)}</p>
@@ -323,10 +342,10 @@ function Overview({ watches, loading }: ShellBits) {
   const matched = watches.filter((w) => w.status === "MATCHED").length;
   return (
     <div className="grid gap-6">
-      <section className="panel grid gap-6 p-6 lg:grid-cols-[1.2fr_0.8fr]">
-        <div>
+      <section className="grid gap-0 overflow-hidden border border-[#ded8cd] bg-[#fffefd] xl:grid-cols-[minmax(0,1fr)_22rem]">
+        <div className="border-b border-[#ded8cd] p-6 md:p-8 xl:border-b-0 xl:border-r">
           <p className="label text-[#0f766e]">Public recall bounties</p>
-          <h1 className="mt-4 max-w-3xl text-5xl font-black leading-tight">Find dangerous recalled products before someone buys them.</h1>
+          <h1 className="display mt-4 max-w-4xl text-5xl font-bold leading-[1.02] md:text-7xl">Find dangerous recalled products before someone buys them.</h1>
           <p className="mt-5 max-w-2xl text-lg leading-8 text-[#4f473c]">
             Sponsors fund product safety watches. Scouts submit public product evidence and official recall sources. GenLayer validators fetch the pages and decide whether the product matches the recall.
           </p>
@@ -335,7 +354,7 @@ function Overview({ watches, loading }: ShellBits) {
             <Link className="button-secondary" href="/scout"><FileSearch size={18} /> Submit evidence</Link>
           </div>
         </div>
-        <div className="grid gap-3">
+        <div className="grid content-start divide-y divide-[#ded8cd]">
           <Metric label="Open bounties" value={loading ? "..." : String(open)} />
           <Metric label="Awaiting consensus" value={loading ? "..." : String(reported)} />
           <Metric label="Verified matches" value={loading ? "..." : String(matched)} />
@@ -360,24 +379,24 @@ type ShellBits = {
 
 function Metric({ label, value }: { label: string; value: string }) {
   return (
-    <div className="border border-[#eee7dc] bg-[#faf7f0] p-4">
+    <div className="bg-[#faf7f0] p-5">
       <p className="label">{label}</p>
-      <p className="mt-2 text-3xl font-black">{value}</p>
+      <p className="display mt-2 text-5xl font-bold">{value}</p>
     </div>
   );
 }
 
 function WatchesView({ watches, loading, refresh }: ShellBits) {
   return (
-    <section className="panel p-6">
-      <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+    <section className="border border-[#ded8cd] bg-[#fffefd]">
+      <div className="flex flex-col gap-3 border-b border-[#ded8cd] p-5 md:flex-row md:items-end md:justify-between">
         <div>
           <p className="label">Public board</p>
-          <h1 className="mt-2 text-4xl font-black">Recall watches</h1>
+          <h1 className="display mt-2 text-5xl font-bold">Recall watches</h1>
         </div>
         <button className="button-secondary" onClick={refresh}><RefreshCw size={16} /> Refresh</button>
       </div>
-      <WatchesList watches={watches} loading={loading} empty="No watches have been created on this contract." />
+      <div className="p-5"><WatchesList watches={watches} loading={loading} empty="No watches have been created on this contract." /></div>
     </section>
   );
 }
@@ -403,10 +422,13 @@ function SponsorView({ busy, getWriteClient, trackWrite }: ShellBits) {
     });
   }
   return (
-    <section className="panel p-6">
+    <section className="grid gap-0 border border-[#ded8cd] bg-[#fffefd] lg:grid-cols-[20rem_minmax(0,1fr)]">
+      <div className="border-b border-[#ded8cd] bg-[#faf7f0] p-6 lg:border-b-0 lg:border-r">
       <p className="label">Sponsor</p>
-      <h1 className="mt-2 text-4xl font-black">Fund a recall watch</h1>
-      <div className="mt-6 grid gap-4">
+      <h1 className="display mt-2 text-5xl font-bold leading-tight">Fund a recall watch</h1>
+      <p className="mt-4 text-sm leading-6 text-[#5f574b]">Create the bounty first. Evidence and consensus happen later, so nobody waits through a slow review while filling out this form.</p>
+      </div>
+      <div className="grid gap-4 p-6">
         <Input label="Title" value={form.title} onChange={(title) => setForm({ ...form, title })} />
         <Input label="Category" value={form.category} onChange={(category) => setForm({ ...form, category })} />
         <Textarea label="Match criteria" value={form.criteria} onChange={(criteria) => setForm({ ...form, criteria })} />
@@ -422,9 +444,9 @@ function SponsorView({ busy, getWriteClient, trackWrite }: ShellBits) {
 function ScoutView(props: ShellBits) {
   const open = props.watches.filter((w) => w.status === "OPEN" || w.status === "UNKNOWN");
   return (
-    <section className="panel p-6">
+    <section className="border border-[#ded8cd] bg-[#fffefd] p-6">
       <p className="label">Scout desk</p>
-      <h1 className="mt-2 text-4xl font-black">Submit recall evidence</h1>
+      <h1 className="display mt-2 text-5xl font-bold">Submit recall evidence</h1>
       <WatchesList watches={open} loading={props.loading} empty="No open watches are ready for scouts." action={(watch) => <SubmitBox watch={watch} {...props} />} />
     </section>
   );
@@ -459,10 +481,10 @@ function ReviewView(props: ShellBits) {
   const ready = props.watches.filter((w) => w.status === "REPORTED");
   const unknown = props.watches.filter((w) => w.status === "UNKNOWN");
   return (
-    <section className="panel p-6">
+    <section className="border border-[#ded8cd] bg-[#fffefd] p-6">
       <p className="label">Permissionless review</p>
-      <h1 className="mt-2 text-4xl font-black">Consensus queue</h1>
-      <div className="mt-5 grid gap-4 md:grid-cols-3">
+      <h1 className="display mt-2 text-5xl font-bold">Consensus queue</h1>
+      <div className="mt-5 grid border border-[#ded8cd] md:grid-cols-3 md:divide-x md:divide-[#ded8cd]">
         <Metric label="Ready" value={String(ready.length)} />
         <Metric label="Unknown" value={String(unknown.length)} />
         <Metric label="Consensus round" value="1 fetch round" />
@@ -503,9 +525,9 @@ function ReviewActions({ watch, busy, getWriteClient, trackWrite, activeAddress 
 
 function HistoryView({ watches, loading, refresh }: { watches: WatchRecord[]; loading: boolean; refresh: () => Promise<void> }) {
   return (
-    <section className="panel p-6">
+    <section className="border border-[#ded8cd] bg-[#fffefd] p-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-black">Your watch history</h1>
+        <h1 className="display text-4xl font-bold">Your watch history</h1>
         <button className="button-secondary" onClick={refresh}><RefreshCw size={16} /> Refresh</button>
       </div>
       <WatchesList watches={watches} loading={loading} empty="Connect the wallet used as sponsor or scout to see your history." />
@@ -515,12 +537,12 @@ function HistoryView({ watches, loading, refresh }: { watches: WatchRecord[]; lo
 
 function WatchDetail({ watch, loading, ...props }: ShellBits & { watch?: WatchRecord }) {
   if (loading) return <Skeleton />;
-  if (!watch) return <section className="panel p-6"><h1 className="text-3xl font-black">Watch not found</h1></section>;
+  if (!watch) return <section className="panel p-6"><h1 className="display text-4xl font-bold">Watch not found</h1></section>;
   return (
-    <section className="panel p-6">
+    <section className="border border-[#ded8cd] bg-[#fffefd] p-6">
       <p className="label">{watch.watch_id}</p>
-      <h1 className="mt-2 text-4xl font-black">{watch.title}</h1>
-      <div className="mt-5 grid gap-4 md:grid-cols-3">
+      <h1 className="display mt-2 text-5xl font-bold">{watch.title}</h1>
+      <div className="mt-5 grid border border-[#ded8cd] md:grid-cols-3 md:divide-x md:divide-[#ded8cd]">
         <Metric label="Status" value={watch.status} />
         <Metric label="Bounty" value={formatGen(watch.bounty)} />
         <Metric label="Attempts" value={watch.attempts} />
@@ -546,9 +568,9 @@ function ProfileView({ address, watches }: { address?: string; watches: WatchRec
   const lower = address?.toLowerCase();
   const scoped = lower ? watches.filter((w) => w.sponsor.toLowerCase() === lower || w.scout.toLowerCase() === lower) : [];
   return (
-    <section className="panel p-6">
+    <section className="border border-[#ded8cd] bg-[#fffefd] p-6">
       <p className="label">Profile</p>
-      <h1 className="mt-2 break-all text-3xl font-black">{address}</h1>
+      <h1 className="display mt-2 break-all text-4xl font-bold">{address}</h1>
       <WatchesList watches={scoped} loading={false} empty="No watches found for this address in the loaded page." />
     </section>
   );
@@ -558,18 +580,19 @@ function WatchesList({ watches, loading, empty, action }: { watches: WatchRecord
   if (loading) return <Skeleton />;
   if (!watches.length) return <div className="mt-6 border border-dashed border-[#d2cabd] p-6 text-[#5f574b]">{empty}</div>;
   return (
-    <div className="mt-6 grid gap-3">
+    <div className="mt-6 border-y border-[#ded8cd]">
       {watches.map((watch) => (
-        <article key={watch.watch_id} className="border border-[#eee7dc] bg-white p-4">
-          <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+        <article key={watch.watch_id} className="border-b border-[#eee7dc] bg-white last:border-b-0">
+          <div className="ledger-grid gap-4 p-4">
+            <div className="font-mono text-sm font-bold text-[#766d61]">{watch.watch_id}<br />{formatGen(watch.bounty)}</div>
             <div>
               <Link className="text-xl font-black hover:underline" href={`/watch/${watch.watch_id}`}>{watch.title}</Link>
-              <p className="mt-1 text-[#5f574b]">{watch.watch_id} · {watch.category} · {formatGen(watch.bounty)}</p>
+              <p className="mt-1 text-[#5f574b]">{watch.category}</p>
               <p className="mt-2 max-w-3xl text-sm leading-6 text-[#5f574b]">{watch.criteria}</p>
             </div>
             <StatusBadge status={watch.status} />
           </div>
-          {action ? action(watch) : null}
+          {action ? <div className="border-t border-[#eee7dc] px-4 pb-4">{action(watch)}</div> : null}
         </article>
       ))}
     </div>
@@ -578,7 +601,7 @@ function WatchesList({ watches, loading, empty, action }: { watches: WatchRecord
 
 function StatusBadge({ status }: { status: string }) {
   const tone = status === "MATCHED" ? "border-emerald-200 bg-emerald-50 text-emerald-800" : status === "UNKNOWN" ? "border-amber-200 bg-amber-50 text-amber-900" : status === "REJECTED" ? "border-red-200 bg-red-50 text-red-800" : "border-[#d2cabd] bg-[#faf7f0] text-[#4f473c]";
-  return <span className={`inline-flex w-fit rounded-md border px-3 py-2 text-sm font-black ${tone}`}>{status}</span>;
+  return <span className={`inline-flex w-fit border px-3 py-2 text-sm font-black ${tone}`}>{status}</span>;
 }
 
 function Input({ label, value, onChange, type = "text" }: { label: string; value: string; onChange: (value: string) => void; type?: string }) {

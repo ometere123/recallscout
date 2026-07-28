@@ -16,9 +16,10 @@ export const chain = CHAINS[CHAIN_NAME as keyof typeof CHAINS] ?? studionet;
 export const contractAddress = (process.env.NEXT_PUBLIC_RECALLSCOUT_ADDRESS ??
   "0xeb93Bc26cd7fB3abf112a30509B1247c1B2b8b2c") as Address;
 export const explorerBase = process.env.NEXT_PUBLIC_GENLAYER_EXPLORER ?? "https://explorer-studio.genlayer.com";
+export const rpcEndpoint = process.env.NEXT_PUBLIC_GENLAYER_RPC_ENDPOINT ?? "/api/genlayer-rpc";
 
 export function makeReadClient() {
-  return createClient({ chain, account: createAccount() });
+  return createClient({ chain, endpoint: rpcEndpoint, account: createAccount() });
 }
 
 export function makeGeneratedWallet() {
@@ -27,11 +28,11 @@ export function makeGeneratedWallet() {
 }
 
 export function makeLocalWriteClient(privateKey: `0x${string}`) {
-  return createClient({ chain, account: createAccount(privateKey) });
+  return createClient({ chain, endpoint: rpcEndpoint, account: createAccount(privateKey) });
 }
 
 export async function makeInjectedWriteClient(address: Address) {
-  const client = createClient({ chain, account: address });
+  const client = createClient({ chain, endpoint: rpcEndpoint, account: address });
   await client.connect(CHAIN_NAME as Network);
   return client;
 }

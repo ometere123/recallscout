@@ -40,7 +40,8 @@ select:focus-visible {
 .panel {
   border: 1px solid #ded8cd;
   background: #fffefd;
-  border-radius: 8px;
+  border-radius: 2px;
+  box-shadow: 0 1px 0 rgba(23, 21, 18, 0.05);
 }
 
 .button-primary {
@@ -49,7 +50,7 @@ select:focus-visible {
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  border-radius: 6px;
+  border-radius: 2px;
   background: #0f766e;
   padding: 0.625rem 0.9rem;
   color: white;
@@ -67,7 +68,7 @@ select:focus-visible {
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  border-radius: 6px;
+  border-radius: 2px;
   border: 1px solid #d2cabd;
   background: #fffefd;
   padding: 0.625rem 0.9rem;
@@ -77,7 +78,7 @@ select:focus-visible {
 
 .field {
   width: 100%;
-  border-radius: 6px;
+  border-radius: 2px;
   border: 1px solid #cfc7ba;
   background: white;
   padding: 0.7rem 0.8rem;
@@ -90,4 +91,20 @@ select:focus-visible {
   font-size: 0.82rem;
   font-weight: 700;
   text-transform: uppercase;
+}
+
+.display {
+  font-family: Georgia, "Times New Roman", serif;
+  letter-spacing: 0;
+}
+
+.ledger-grid {
+  display: grid;
+  grid-template-columns: 7.5rem minmax(0, 1fr) auto;
+}
+
+@media (max-width: 760px) {
+  .ledger-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
