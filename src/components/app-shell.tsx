@@ -613,6 +613,7 @@ function WatchDetail({ watch, loading, ...props }: ShellBits & { watch?: WatchRe
         <Metric label="Bounty" value={formatGen(watch.bounty)} />
         <Metric label="Attempts" value={watch.attempts} />
       </div>
+      <FundsSummary watch={watch} />
       <div className="mt-6 grid gap-4 md:grid-cols-2">
         <Info label="Sponsor" value={watch.sponsor} href={`/profile/${watch.sponsor}`} />
         <Info label="Scout" value={watch.scout === zeroAddress ? "No scout yet" : watch.scout} href={watch.scout === zeroAddress ? undefined : `/profile/${watch.scout}`} />
@@ -634,6 +635,39 @@ function WatchDetail({ watch, loading, ...props }: ShellBits & { watch?: WatchRe
       ) : null}
       <ReviewActions watch={watch} loading={loading} {...props} />
     </section>
+  );
+}
+
+function FundsSummary({ watch }: { watch: WatchRecord }) {
+  const hasScout = watch.scout !== zeroAddress;
+  const settled = watch.released_to !== zeroAddress;
+  const settlement =
+    watch.status === "MATCHED"
+      ? `Released to scout ${shortAddress(watch.released_to)}`
+      : watch.status === "REJECTED" || watch.status === "CANCELED"
+        ? `Returned to sponsor ${shortAddress(watch.released_to || watch.sponsor)}`
+        : watch.status === "UNWOUND"
+          ? "Bounty returned to sponsor; scout bond returned to scout"
+          : "Not settled yet";
+  return (
+    <section className="mt-5 border border-[var(--border-soft)] bg-[var(--surface-muted)] p-4">
+      <p className="label">Funds</p>
+      <div className="mt-3 grid gap-3 md:grid-cols-3">
+        <MoneyLine label="Sponsor locked" value={formatGen(watch.bounty)} note={watch.sponsor} />
+        <MoneyLine label="Scout bond" value={formatGen(watch.scout_bond)} note={hasScout ? watch.scout : "No scout bond yet"} />
+        <MoneyLine label={settled ? "Settlement" : "Current state"} value={settlement} note={watch.status} />
+      </div>
+    </section>
+  );
+}
+
+function MoneyLine({ label, value, note }: { label: string; value: string; note: string }) {
+  return (
+    <div className="border border-[var(--border-muted)] bg-[var(--surface)] p-3">
+      <p className="label">{label}</p>
+      <p className="mt-2 break-words font-bold">{value}</p>
+      <p className="mt-1 break-all font-mono text-xs text-[var(--muted)]">{note}</p>
+    </div>
   );
 }
 
