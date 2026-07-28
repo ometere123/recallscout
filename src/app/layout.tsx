@@ -15,6 +15,9 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "RecallScout",
   description: "Recall bounties verified by GenLayer consensus.",
+  icons: {
+    icon: "/icon.svg",
+  },
 };
 
 export default function RootLayout({
