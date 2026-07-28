@@ -68,6 +68,7 @@
 body {
   background: var(--background);
   color: var(--foreground);
+  overflow-x: hidden;
 }
 
 button,
@@ -104,6 +105,7 @@ select:focus-visible {
   padding: 0.5rem 0.75rem;
   color: var(--button-text);
   font-weight: 700;
+  text-align: center;
 }
 
 .button-primary:disabled {
@@ -123,10 +125,12 @@ select:focus-visible {
   padding: 0.5rem 0.75rem;
   color: var(--ink);
   font-weight: 700;
+  text-align: center;
 }
 
 .field {
   width: 100%;
+  min-width: 0;
   border-radius: 2px;
   border: 1px solid var(--border-soft);
   background: var(--field-bg);
@@ -150,6 +154,14 @@ select:focus-visible {
 .ledger-grid {
   display: grid;
   grid-template-columns: 6.25rem minmax(0, 1fr) auto;
+}
+
+a,
+p,
+h1,
+h2,
+h3 {
+  overflow-wrap: anywhere;
 }
 
 @media (max-width: 760px) {

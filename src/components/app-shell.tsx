@@ -233,7 +233,7 @@ export function AppShell({ view, watchId, profileAddress }: Props) {
     <div className="min-h-screen bg-[var(--app-bg)] text-[var(--ink)]">
       <div className="min-h-screen lg:grid lg:grid-cols-[12.5rem_minmax(0,1fr)]">
         <aside className="border-b border-[var(--border-soft)] bg-[var(--surface)] lg:sticky lg:top-0 lg:h-screen lg:border-b-0 lg:border-r">
-          <div className="flex items-center justify-between gap-4 px-4 py-4 lg:block lg:px-3 lg:py-4">
+          <div className="flex items-center justify-between gap-3 px-3 py-3 sm:px-4 sm:py-4 lg:block lg:px-3 lg:py-4">
             <Link href="/" className="flex items-center gap-3">
               <span className="grid size-8 place-items-center border border-[var(--primary)] bg-[var(--primary-muted)] text-[var(--primary-muted-ink)]">
                 <PackageSearch size={18} />
@@ -264,17 +264,17 @@ export function AppShell({ view, watchId, profileAddress }: Props) {
       <header className="border-b border-[var(--border-soft)] bg-[var(--surface)] px-3 py-3 lg:px-5">
         <div className="mx-auto flex max-w-[78rem] items-center justify-between gap-3">
           <p className="hidden text-xs font-bold uppercase text-[var(--muted)] sm:block">StudioNet recall evidence desk</p>
-          <div className="relative ml-auto flex items-center gap-2">
+          <div className="relative ml-auto flex min-w-0 items-center gap-2">
             <button className="button-secondary px-2.5" onClick={toggleTheme} aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}>
               {theme === "dark" ? <Sun size={16} /> : <Moon size={16} />}
             </button>
-            <button className="button-primary" onClick={() => setWallet((current) => ({ ...current, menuOpen: !current.menuOpen }))}>
+            <button className="button-primary max-w-[13rem] sm:max-w-none" onClick={() => setWallet((current) => ({ ...current, menuOpen: !current.menuOpen }))}>
               {wallet.address ? <Check size={18} /> : <Wallet size={18} />}
-              {wallet.address ? shortAddress(wallet.address) : "Connect wallet"}
+              <span className="truncate">{wallet.address ? shortAddress(wallet.address) : "Connect wallet"}</span>
               <ChevronDown size={16} />
             </button>
             {wallet.menuOpen ? (
-              <div className="absolute right-0 top-full z-20 mt-2 w-80 border border-[var(--border-soft)] bg-[var(--surface)] p-3 shadow-lg">
+              <div className="absolute right-0 top-full z-20 mt-2 w-[calc(100vw-1.5rem)] max-w-80 border border-[var(--border-soft)] bg-[var(--surface)] p-3 shadow-lg">
                 <p className="label">{wallet.mode === "browser" ? "Browser wallet" : wallet.mode === "injected" ? "Injected wallet" : "No wallet"}</p>
                 <p className={`mt-1 text-sm ${wallet.address ? "break-all font-mono" : "leading-6 text-[var(--muted)]"}`}>{wallet.address ?? "Connect to create, report, and verify watches."}</p>
                 <div className="mt-3 grid gap-2">
@@ -317,7 +317,7 @@ export function AppShell({ view, watchId, profileAddress }: Props) {
         </section>
       ) : null}
 
-      <main className="mx-auto max-w-[78rem] px-3 py-4 lg:px-5 lg:py-5">
+      <main className="mx-auto max-w-[78rem] px-3 py-4 sm:px-4 lg:px-5 lg:py-5">
         <PendingTransactions txs={txs} />
         {error ? <ErrorBox message={error} /> : null}
         {view === "overview" ? <Overview {...common} /> : null}
@@ -421,7 +421,7 @@ function Metric({ label, value }: { label: string; value: string }) {
   return (
     <div className="bg-[var(--surface-muted)] p-3">
       <p className="label">{label}</p>
-      <p className="display mt-2 text-3xl font-bold">{value}</p>
+      <p className="display mt-2 break-words text-2xl font-bold sm:text-3xl">{value}</p>
     </div>
   );
 }
@@ -436,7 +436,7 @@ function WatchesView({ watches, loading, refresh }: ShellBits) {
         </div>
         <button className="button-secondary" onClick={refresh}><RefreshCw size={16} /> Refresh</button>
       </div>
-      <div className="p-5"><WatchesList watches={watches} loading={loading} empty="No watches have been created on this contract." /></div>
+      <div className="p-4 sm:p-5"><WatchesList watches={watches} loading={loading} empty="No watches have been created on this contract." /></div>
     </section>
   );
 }
@@ -473,12 +473,12 @@ function SponsorView({ busy, getWriteClient, trackWrite }: ShellBits) {
   }
   return (
     <section className="grid gap-0 border border-[var(--border-soft)] bg-[var(--surface)] lg:grid-cols-[14rem_minmax(0,1fr)]">
-      <div className="border-b border-[var(--border-soft)] bg-[var(--surface-muted)] p-5 lg:border-b-0 lg:border-r">
+      <div className="border-b border-[var(--border-soft)] bg-[var(--surface-muted)] p-4 sm:p-5 lg:border-b-0 lg:border-r">
       <p className="label">Sponsor</p>
-      <h1 className="display mt-2 text-3xl font-bold leading-tight">Fund a recall watch</h1>
+      <h1 className="display mt-2 text-2xl font-bold leading-tight sm:text-3xl">Fund a recall watch</h1>
       <p className="mt-4 text-sm leading-6 text-[var(--muted)]">Create the bounty first. Evidence and consensus happen later, so nobody waits through a slow review while filling out this form.</p>
       </div>
-      <div className="grid gap-3 p-5">
+      <div className="grid gap-3 p-4 sm:p-5">
         <button type="button" className="button-secondary w-fit" onClick={fillDemoValues}><Clipboard size={16} /> Use demo values</button>
         <Input label="Title" value={form.title} onChange={(title) => setForm({ ...form, title })} />
         <Input label="Category" value={form.category} onChange={(category) => setForm({ ...form, category })} />
@@ -495,9 +495,9 @@ function SponsorView({ busy, getWriteClient, trackWrite }: ShellBits) {
 function ScoutView(props: ShellBits) {
   const open = props.watches.filter((w) => w.status === "OPEN" || w.status === "UNKNOWN");
   return (
-    <section className="border border-[var(--border-soft)] bg-[var(--surface)] p-5">
+    <section className="border border-[var(--border-soft)] bg-[var(--surface)] p-4 sm:p-5">
       <p className="label">Scout desk</p>
-      <h1 className="display mt-2 text-3xl font-bold">Scout open watches</h1>
+      <h1 className="display mt-2 text-2xl font-bold sm:text-3xl">Scout open watches</h1>
       <p className="mt-2 max-w-2xl text-sm leading-6 text-[var(--muted)]">Pick an open watch from the queue, or submit directly from any watch detail page.</p>
       <WatchesList watches={open} loading={props.loading} empty="No open or retryable watches are ready for scouts." action={(watch) => <SubmitBox watch={watch} {...props} />} />
     </section>
@@ -543,9 +543,9 @@ function ReviewView(props: ShellBits) {
   const ready = props.watches.filter((w) => w.status === "REPORTED");
   const unknown = props.watches.filter((w) => w.status === "UNKNOWN");
   return (
-    <section className="border border-[var(--border-soft)] bg-[var(--surface)] p-5">
+    <section className="border border-[var(--border-soft)] bg-[var(--surface)] p-4 sm:p-5">
       <p className="label">Permissionless review</p>
-      <h1 className="display mt-2 text-3xl font-bold">Consensus queue</h1>
+      <h1 className="display mt-2 text-2xl font-bold sm:text-3xl">Consensus queue</h1>
       <div className="mt-5 grid border border-[var(--border-soft)] md:grid-cols-3 md:divide-x md:divide-[var(--border-soft)]">
         <Metric label="Ready" value={String(ready.length)} />
         <Metric label="Unknown" value={String(unknown.length)} />
@@ -577,7 +577,7 @@ function ReviewActions({ watch, busy, getWriteClient, trackWrite, activeAddress 
     });
   }
   return (
-    <div className="mt-4 flex flex-wrap gap-2 border-t border-[var(--border-muted)] pt-4">
+    <div className="mt-4 flex flex-col gap-2 border-t border-[var(--border-muted)] pt-4 sm:flex-row sm:flex-wrap">
       <button className="button-primary" onClick={verify} disabled={Boolean(busy) || watch.status !== "REPORTED"}><ShieldCheck size={16} /> Verify</button>
       {isSponsor ? <button className="button-secondary" onClick={accept} disabled={Boolean(busy)}><Check size={16} /> Accept</button> : null}
       {isSponsor && watch.status === "UNKNOWN" ? <button className="button-secondary" onClick={unwind} disabled={Boolean(busy)}><History size={16} /> Unwind</button> : null}
@@ -590,9 +590,9 @@ function HistoryView({ watches, loading, refresh, activeAddress }: { watches: Wa
     ? "No watches yet. This wallet has not sponsored or submitted any recall watches."
     : "Connect the wallet used as sponsor or scout to see your watches.";
   return (
-    <section className="border border-[var(--border-soft)] bg-[var(--surface)] p-5">
-      <div className="flex items-center justify-between">
-        <h1 className="display text-3xl font-bold">My Watches</h1>
+    <section className="border border-[var(--border-soft)] bg-[var(--surface)] p-4 sm:p-5">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <h1 className="display text-2xl font-bold sm:text-3xl">My Watches</h1>
         <button className="button-secondary" onClick={refresh}><RefreshCw size={16} /> Refresh</button>
       </div>
       <WatchesList watches={watches} loading={loading} empty={emptyCopy} />
@@ -602,12 +602,12 @@ function HistoryView({ watches, loading, refresh, activeAddress }: { watches: Wa
 
 function WatchDetail({ watch, loading, ...props }: ShellBits & { watch?: WatchRecord }) {
   if (loading) return <Skeleton />;
-  if (!watch) return <section className="panel p-5"><h1 className="display text-3xl font-bold">Watch not found</h1></section>;
+  if (!watch) return <section className="panel p-4 sm:p-5"><h1 className="display text-2xl font-bold sm:text-3xl">Watch not found</h1></section>;
   const canSubmit = watch.status === "OPEN" || watch.status === "UNKNOWN";
   return (
-    <section className="border border-[var(--border-soft)] bg-[var(--surface)] p-5">
+    <section className="border border-[var(--border-soft)] bg-[var(--surface)] p-4 sm:p-5">
       <p className="label">{watch.watch_id}</p>
-      <h1 className="display mt-2 text-3xl font-bold">{watch.title}</h1>
+      <h1 className="display mt-2 break-words text-2xl font-bold sm:text-3xl">{watch.title}</h1>
       <div className="mt-5 grid border border-[var(--border-soft)] md:grid-cols-3 md:divide-x md:divide-[var(--border-soft)]">
         <Metric label="Status" value={watch.status} />
         <Metric label="Bounty" value={formatGen(watch.bounty)} />
@@ -641,9 +641,9 @@ function ProfileView({ address, watches }: { address?: string; watches: WatchRec
   const lower = address?.toLowerCase();
   const scoped = lower ? watches.filter((w) => w.sponsor.toLowerCase() === lower || w.scout.toLowerCase() === lower) : [];
   return (
-    <section className="border border-[var(--border-soft)] bg-[var(--surface)] p-5">
+    <section className="border border-[var(--border-soft)] bg-[var(--surface)] p-4 sm:p-5">
       <p className="label">Profile</p>
-      <h1 className="display mt-2 break-all text-3xl font-bold">{address}</h1>
+      <h1 className="display mt-2 break-all text-xl font-bold sm:text-3xl">{address}</h1>
       <WatchesList watches={scoped} loading={false} empty="No watches found for this address in the loaded page." />
     </section>
   );
