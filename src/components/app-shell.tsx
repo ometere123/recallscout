@@ -45,7 +45,7 @@ import {
   upsertTx,
   type TrackedTx,
 } from "@/lib/storage";
-import { formatGen, formatUtc, localInputToUtc, parseGen, sha256Placeholder, shortAddress, toDeadlineLocalInput } from "@/lib/format";
+import { formatGen, formatUtc, localInputToUtc, parseGen, shortAddress } from "@/lib/format";
 
 type View = "overview" | "watches" | "sponsor" | "scout" | "review" | "history" | "watch" | "profile";
 
@@ -429,12 +429,12 @@ function WatchesView({ watches, loading, refresh }: ShellBits) {
 
 function SponsorView({ busy, getWriteClient, trackWrite }: ShellBits) {
   const [form, setForm] = useState({
-    title: "Romorgniz 12-drawer dresser recall",
-    category: "Furniture / child safety",
-    criteria: "Pay a scout who submits a live product listing that appears to match the official CPSC recall by brand, model, product line, or hazard description.",
-    source: "CPSC recalls",
-    deadline: toDeadlineLocalInput(),
-    bounty: "1",
+    title: "",
+    category: "",
+    criteria: "",
+    source: "",
+    deadline: "",
+    bounty: "",
   });
   async function submit() {
     await trackWrite("Create recall watch", undefined, async () => {
@@ -479,7 +479,7 @@ function ScoutView(props: ShellBits) {
 }
 
 function SubmitBox({ watch, busy, getWriteClient, trackWrite }: ShellBits & { watch: WatchRecord }) {
-  const [form, setForm] = useState({ productUrl: "https://www.amazon.com/", productHash: sha256Placeholder(), recallUrl: "https://www.cpsc.gov/Recalls", sourceName: "CPSC", corroboratingUrl: "" });
+  const [form, setForm] = useState({ productUrl: "", productHash: "", recallUrl: "", sourceName: "", corroboratingUrl: "" });
   async function submit() {
     await trackWrite("Submit recall report", watch.watch_id, async () => {
       const client = await getWriteClient();
