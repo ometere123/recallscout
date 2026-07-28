@@ -498,8 +498,9 @@ function ScoutView(props: ShellBits) {
   return (
     <section className="border border-[var(--border-soft)] bg-[var(--surface)] p-5">
       <p className="label">Scout desk</p>
-      <h1 className="display mt-2 text-3xl font-bold">Submit recall evidence</h1>
-      <WatchesList watches={open} loading={props.loading} empty="No open watches are ready for scouts." action={(watch) => <SubmitBox watch={watch} {...props} />} />
+      <h1 className="display mt-2 text-3xl font-bold">Scout open watches</h1>
+      <p className="mt-2 max-w-2xl text-sm leading-6 text-[var(--muted)]">Pick an open watch from the queue, or submit directly from any watch detail page.</p>
+      <WatchesList watches={open} loading={props.loading} empty="No open or retryable watches are ready for scouts." action={(watch) => <SubmitBox watch={watch} {...props} />} />
     </section>
   );
 }
