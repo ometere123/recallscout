@@ -65,6 +65,7 @@ type ThemeMode = "light" | "dark";
 
 const zeroAddress = "0x0000000000000000000000000000000000000000";
 const demoHash = "sha256:5edbaf4be3969d80f57bb5860aca8f3423b291a958981b1a25fb3e5cdb3a94ed";
+const demoRecallUrl = "https://www.cpsc.gov/Recalls/2026/12-Drawer-Fabric-Dressers-Recalled-Due-to-Risk-of-Serious-Injury-or-Death-from-Tip-Over-and-Entrapment-Hazards-Violate-Mandatory-Standard-for-Clothing-Storage-Units-Sold-on-Amazon-by-Romorgniz";
 
 function demoDeadlineLocalInput() {
   const date = new Date();
@@ -451,10 +452,10 @@ function SponsorView({ busy, getWriteClient, trackWrite }: ShellBits) {
   });
   function fillDemoValues() {
     setForm({
-      title: "CPSC dresser recall scout check",
+      title: "Romorgniz 12-drawer fabric dresser recall",
       category: "Furniture / child safety",
-      criteria: "Pay a scout who submits a public product page and an official recall source that describe the same recalled dresser, including matching brand, model, product line, or hazard details.",
-      source: "CPSC recalls",
+      criteria: "Verify that the submitted evidence identifies Romorgniz 12-Drawer Fabric Dressers covered by an official CPSC recall for tip-over and entrapment hazards.",
+      source: "CPSC",
       deadline: demoDeadlineLocalInput(),
       bounty: "1",
     });
@@ -507,11 +508,11 @@ function SubmitBox({ watch, busy, getWriteClient, trackWrite }: ShellBits & { wa
   const [form, setForm] = useState({ productUrl: "", productHash: "", recallUrl: "", sourceName: "", corroboratingUrl: "" });
   function fillDemoValues() {
     setForm({
-      productUrl: "https://www.cpsc.gov/Recalls",
+      productUrl: demoRecallUrl,
       productHash: demoHash,
-      recallUrl: "https://www.cpsc.gov/Recalls",
+      recallUrl: demoRecallUrl,
       sourceName: "CPSC",
-      corroboratingUrl: "https://www.cpsc.gov/Recalls",
+      corroboratingUrl: "",
     });
   }
   async function submit() {

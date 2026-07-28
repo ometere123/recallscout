@@ -13,6 +13,7 @@ const reviewer = createClient({ chain: studionet, account: reviewerAccount });
 const readClient = createClient({ chain: studionet, account: createAccount() });
 const oneGen = 10n ** 18n;
 const bond = 1n;
+const demoRecallUrl = "https://www.cpsc.gov/Recalls/2026/12-Drawer-Fabric-Dressers-Recalled-Due-to-Risk-of-Serious-Injury-or-Death-from-Tip-Over-and-Entrapment-Hazards-Violate-Mandatory-Standard-for-Clothing-Storage-Units-Sold-on-Amazon-by-Romorgniz";
 
 function hashFor(label) {
   return `sha256:${crypto.createHash("sha256").update(label).digest("hex")}`;
@@ -64,17 +65,17 @@ const txs = [];
 
 const accepted = await create(
   "create sponsor-accepted watch",
-  "CPSC dresser recall scout check",
-  "A scout should submit public evidence related to a CPSC furniture recall."
+  "Romorgniz 12-drawer fabric dresser recall",
+  "Verify that the submitted evidence identifies Romorgniz 12-Drawer Fabric Dressers covered by an official CPSC recall for tip-over and entrapment hazards."
 );
 txs.push(["create sponsor-accepted watch", accepted]);
 txs.push(["submit sponsor-accepted report", await write(scout, "submit sponsor-accepted report", "submit_report", [
   accepted,
-  "https://www.cpsc.gov/Recalls",
-  hashFor("CPSC recalls page as sponsor accepted evidence"),
-  "https://www.cpsc.gov/Recalls",
+  demoRecallUrl,
+  hashFor("Romorgniz CPSC recall page as sponsor accepted evidence"),
+  demoRecallUrl,
   "CPSC",
-  "https://www.cpsc.gov/Data",
+  "",
 ], bond)]);
 txs.push(["sponsor accept", await write(sponsor, "sponsor accept", "sponsor_accept", [accepted])]);
 console.log("accepted watch:", JSON.stringify(await readWatch(accepted), null, 2));
@@ -91,17 +92,17 @@ console.log("canceled watch:", JSON.stringify(await readWatch(canceled), null, 2
 
 const consensus = await create(
   "create consensus recall watch",
-  "Official recall page match",
-  "The product evidence and official recall source should both describe product recalls or safety warnings from CPSC."
+  "Romorgniz 12-drawer fabric dresser recall",
+  "Verify that the submitted evidence identifies Romorgniz 12-Drawer Fabric Dressers covered by an official CPSC recall for tip-over and entrapment hazards."
 );
 txs.push(["create consensus recall watch", consensus]);
 txs.push(["submit consensus report", await write(scout, "submit consensus report", "submit_report", [
   consensus,
-  "https://www.cpsc.gov/Recalls",
-  hashFor("CPSC recalls page submitted for RecallScout consensus"),
-  "https://www.cpsc.gov/Data",
+  demoRecallUrl,
+  hashFor("Romorgniz CPSC recall page submitted for RecallScout consensus"),
+  demoRecallUrl,
   "CPSC",
-  "https://www.cpsc.gov/Recalls",
+  "",
 ], bond)]);
 txs.push(["verify consensus report", await write(reviewer, "verify consensus report", "verify_report", [consensus])]);
 console.log("consensus watch:", JSON.stringify(await readWatch(consensus), null, 2));
