@@ -85,7 +85,7 @@ export function AppShell({ view, watchId, profileAddress }: Props) {
   const [error, setError] = useState("");
   const [txs, setTxs] = useState<TrackedTx[]>([]);
   const [busy, setBusy] = useState("");
-  const [theme, setTheme] = useState<ThemeMode>("light");
+  const [theme, setTheme] = useState<ThemeMode>("dark");
 
   const activeWatch = useMemo(() => watches.find((item) => item.watch_id.toLowerCase() === (watchId ?? "").toLowerCase()), [watches, watchId]);
   const activeAddress = wallet.address?.toLowerCase();
