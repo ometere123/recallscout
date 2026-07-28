@@ -68,6 +68,13 @@ type WalletState = {
 type ThemeMode = "light" | "dark";
 
 const zeroAddress = "0x0000000000000000000000000000000000000000";
+const demoHash = "sha256:5edbaf4be3969d80f57bb5860aca8f3423b291a958981b1a25fb3e5cdb3a94ed";
+
+function demoDeadlineLocalInput() {
+  const date = new Date();
+  date.setDate(date.getDate() + 7);
+  return date.toISOString().slice(0, 16);
+}
 
 const nav = [
   ["Overview", "/"],
@@ -436,6 +443,16 @@ function SponsorView({ busy, getWriteClient, trackWrite }: ShellBits) {
     deadline: "",
     bounty: "",
   });
+  function fillDemoValues() {
+    setForm({
+      title: "CPSC dresser recall scout check",
+      category: "Furniture / child safety",
+      criteria: "Pay a scout who submits a public product page and an official recall source that describe the same recalled dresser, including matching brand, model, product line, or hazard details.",
+      source: "CPSC recalls",
+      deadline: demoDeadlineLocalInput(),
+      bounty: "1",
+    });
+  }
   async function submit() {
     await trackWrite("Create recall watch", undefined, async () => {
       const client = await getWriteClient();
@@ -455,6 +472,7 @@ function SponsorView({ busy, getWriteClient, trackWrite }: ShellBits) {
       <p className="mt-4 text-sm leading-6 text-[var(--muted)]">Create the bounty first. Evidence and consensus happen later, so nobody waits through a slow review while filling out this form.</p>
       </div>
       <div className="grid gap-3 p-5">
+        <button type="button" className="button-secondary w-fit" onClick={fillDemoValues}><Clipboard size={16} /> Use demo values</button>
         <Input label="Title" value={form.title} onChange={(title) => setForm({ ...form, title })} />
         <Input label="Category" value={form.category} onChange={(category) => setForm({ ...form, category })} />
         <Textarea label="Match criteria" value={form.criteria} onChange={(criteria) => setForm({ ...form, criteria })} />
@@ -480,6 +498,15 @@ function ScoutView(props: ShellBits) {
 
 function SubmitBox({ watch, busy, getWriteClient, trackWrite }: ShellBits & { watch: WatchRecord }) {
   const [form, setForm] = useState({ productUrl: "", productHash: "", recallUrl: "", sourceName: "", corroboratingUrl: "" });
+  function fillDemoValues() {
+    setForm({
+      productUrl: "https://www.cpsc.gov/Recalls",
+      productHash: demoHash,
+      recallUrl: "https://www.cpsc.gov/Recalls",
+      sourceName: "CPSC",
+      corroboratingUrl: "https://www.cpsc.gov/Recalls",
+    });
+  }
   async function submit() {
     await trackWrite("Submit recall report", watch.watch_id, async () => {
       const client = await getWriteClient();
@@ -493,6 +520,7 @@ function SubmitBox({ watch, busy, getWriteClient, trackWrite }: ShellBits & { wa
   }
   return (
     <div className="mt-4 grid gap-3 border-t border-[var(--border-muted)] pt-4">
+      <button type="button" className="button-secondary w-fit" onClick={fillDemoValues}><Clipboard size={16} /> Use demo values</button>
       <Input label="Product evidence URL" value={form.productUrl} onChange={(productUrl) => setForm({ ...form, productUrl })} />
       <Input label="Committed evidence hash" value={form.productHash} onChange={(productHash) => setForm({ ...form, productHash })} />
       <Input label="Official recall URL" value={form.recallUrl} onChange={(recallUrl) => setForm({ ...form, recallUrl })} />
