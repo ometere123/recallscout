@@ -354,7 +354,7 @@ function Overview({ watches, loading }: ShellBits) {
             <Link className="button-secondary" href="/scout"><FileSearch size={18} /> Submit evidence</Link>
           </div>
         </div>
-        <div className="grid content-start divide-y divide-[#ded8cd]">
+        <div className="grid content-start">
           <Metric label="Open bounties" value={loading ? "..." : String(open)} />
           <Metric label="Awaiting consensus" value={loading ? "..." : String(reported)} />
           <Metric label="Verified matches" value={loading ? "..." : String(matched)} />
@@ -583,7 +583,7 @@ function WatchesList({ watches, loading, empty, action }: { watches: WatchRecord
     <div className="mt-6 border-y border-[#ded8cd]">
       {watches.map((watch) => (
         <article key={watch.watch_id} className="border-b border-[#eee7dc] bg-white last:border-b-0">
-          <div className="ledger-grid gap-4 p-4">
+          <div className="ledger-grid items-start gap-4 p-4">
             <div className="font-mono text-sm font-bold text-[#766d61]">{watch.watch_id}<br />{formatGen(watch.bounty)}</div>
             <div>
               <Link className="text-xl font-black hover:underline" href={`/watch/${watch.watch_id}`}>{watch.title}</Link>
@@ -601,7 +601,7 @@ function WatchesList({ watches, loading, empty, action }: { watches: WatchRecord
 
 function StatusBadge({ status }: { status: string }) {
   const tone = status === "MATCHED" ? "border-emerald-200 bg-emerald-50 text-emerald-800" : status === "UNKNOWN" ? "border-amber-200 bg-amber-50 text-amber-900" : status === "REJECTED" ? "border-red-200 bg-red-50 text-red-800" : "border-[#d2cabd] bg-[#faf7f0] text-[#4f473c]";
-  return <span className={`inline-flex w-fit border px-3 py-2 text-sm font-black ${tone}`}>{status}</span>;
+  return <span className={`inline-flex w-fit justify-self-start border px-3 py-2 text-sm font-black md:justify-self-end ${tone}`}>{status}</span>;
 }
 
 function Input({ label, value, onChange, type = "text" }: { label: string; value: string; onChange: (value: string) => void; type?: string }) {
