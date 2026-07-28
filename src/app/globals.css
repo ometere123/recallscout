@@ -1,8 +1,8 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #fbfaf7;
+  --foreground: #171512;
 }
 
 @theme inline {
@@ -12,15 +12,82 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+* {
+  box-sizing: border-box;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: 3px solid #f0b429;
+  outline-offset: 2px;
+}
+
+.panel {
+  border: 1px solid #ded8cd;
+  background: #fffefd;
+  border-radius: 8px;
+}
+
+.button-primary {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 6px;
+  background: #0f766e;
+  padding: 0.625rem 0.9rem;
+  color: white;
+  font-weight: 700;
+}
+
+.button-primary:disabled {
+  cursor: not-allowed;
+  background: #8fa7a2;
+}
+
+.button-secondary {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 6px;
+  border: 1px solid #d2cabd;
+  background: #fffefd;
+  padding: 0.625rem 0.9rem;
+  color: #171512;
+  font-weight: 700;
+}
+
+.field {
+  width: 100%;
+  border-radius: 6px;
+  border: 1px solid #cfc7ba;
+  background: white;
+  padding: 0.7rem 0.8rem;
+  color: #171512;
+}
+
+.label {
+  display: block;
+  color: #5f574b;
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-transform: uppercase;
 }
