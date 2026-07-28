@@ -12,10 +12,12 @@ import {
   History,
   KeyRound,
   Loader2,
+  Moon,
   PackageSearch,
   Plus,
   RefreshCw,
   ShieldCheck,
+  Sun,
   Upload,
   Wallet,
   X,
@@ -63,6 +65,8 @@ type WalletState = {
   importValue: string;
 };
 
+type ThemeMode = "light" | "dark";
+
 const zeroAddress = "0x0000000000000000000000000000000000000000";
 
 const nav = [
@@ -81,6 +85,7 @@ export function AppShell({ view, watchId, profileAddress }: Props) {
   const [error, setError] = useState("");
   const [txs, setTxs] = useState<TrackedTx[]>([]);
   const [busy, setBusy] = useState("");
+  const [theme, setTheme] = useState<ThemeMode>("light");
 
   const activeWatch = useMemo(() => watches.find((item) => item.watch_id.toLowerCase() === (watchId ?? "").toLowerCase()), [watches, watchId]);
   const activeAddress = wallet.address?.toLowerCase();
@@ -116,6 +121,10 @@ export function AppShell({ view, watchId, profileAddress }: Props) {
 
   useEffect(() => {
     window.setTimeout(() => {
+      const storedTheme = window.localStorage.getItem("recallscout.theme.v1");
+      if (storedTheme === "dark" || storedTheme === "light") {
+        setTheme(storedTheme);
+      }
       const stored = loadPrivateKey();
       if (stored) {
         const client = makeLocalWriteClient(stored);
@@ -127,6 +136,11 @@ export function AppShell({ view, watchId, profileAddress }: Props) {
       void refresh();
     }, 0);
   }, [refresh]);
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme;
+    window.localStorage.setItem("recallscout.theme.v1", theme);
+  }, [theme]);
 
   async function getWriteClient() {
     if (!wallet.address) throw new Error("EXPECTED: connect a wallet before writing.");
@@ -198,39 +212,46 @@ export function AppShell({ view, watchId, profileAddress }: Props) {
     void navigator.clipboard.writeText(wallet.privateKey);
   }
 
+  function toggleTheme() {
+    setTheme((current) => (current === "dark" ? "light" : "dark"));
+  }
+
   const common = { watches, loading, error, busy, wallet, activeAddress, refresh, getWriteClient, trackWrite };
 
   return (
-    <div className="min-h-screen bg-[#fbfaf7] text-[#171512]">
+    <div className="min-h-screen bg-[var(--app-bg)] text-[var(--ink)]">
       <div className="min-h-screen lg:grid lg:grid-cols-[18rem_minmax(0,1fr)]">
-        <aside className="border-b border-[#ded8cd] bg-[#fffefd] lg:sticky lg:top-0 lg:h-screen lg:border-b-0 lg:border-r">
+        <aside className="border-b border-[var(--border-soft)] bg-[var(--surface)] lg:sticky lg:top-0 lg:h-screen lg:border-b-0 lg:border-r">
           <div className="flex items-center justify-between gap-4 px-4 py-4 lg:block lg:px-5 lg:py-6">
             <Link href="/" className="flex items-center gap-3">
-              <span className="grid size-11 place-items-center border border-[#0f766e] bg-[#d7fff2] text-[#075f58]">
+              <span className="grid size-11 place-items-center border border-[var(--primary)] bg-[var(--primary-muted)] text-[var(--primary-muted-ink)]">
                 <PackageSearch size={24} />
               </span>
               <span>
                 <span className="block text-xl font-black">RecallScout</span>
-                <span className="hidden text-xs font-bold uppercase text-[#766d61] lg:block">Safety bounty ledger</span>
+                <span className="hidden text-xs font-bold uppercase text-[var(--muted)] lg:block">Safety bounty ledger</span>
               </span>
             </Link>
             <nav className="hidden gap-1 lg:mt-10 lg:grid">
               {nav.map(([label, href]) => (
-                <Link key={href} href={href} className={`border-l-4 px-3 py-3 font-bold ${isActive(view, href) ? "border-[#0f766e] bg-[#d7fff2] text-[#075f58]" : "border-transparent text-[#5f574b] hover:bg-[#f0ece4]"}`}>
+                <Link key={href} href={href} className={`border-l-4 px-3 py-3 font-bold ${isActive(view, href) ? "border-[var(--primary)] bg-[var(--primary-muted)] text-[var(--primary-muted-ink)]" : "border-transparent text-[var(--muted)] hover:bg-[var(--surface-muted)]"}`}>
                   {label}
                 </Link>
               ))}
             </nav>
-            <div className="relative lg:mt-8">
+            <div className="relative mt-0 flex items-center gap-2 lg:mt-8 lg:block">
+            <button className="button-secondary min-h-11 px-3 lg:mb-2" onClick={toggleTheme} aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}>
+              {theme === "dark" ? <Sun size={16} /> : <Moon size={16} />}
+            </button>
             <button className="button-primary" onClick={() => setWallet((current) => ({ ...current, menuOpen: !current.menuOpen }))}>
               {wallet.address ? <Check size={18} /> : <Wallet size={18} />}
               {wallet.address ? shortAddress(wallet.address) : "Connect wallet"}
               <ChevronDown size={16} />
             </button>
             {wallet.menuOpen ? (
-              <div className="absolute right-0 z-20 mt-2 w-80 border border-[#ded8cd] bg-white p-3 shadow-lg lg:left-0 lg:right-auto">
+              <div className="absolute right-0 z-20 mt-2 w-80 border border-[var(--border-soft)] bg-[var(--surface)] p-3 shadow-lg lg:left-0 lg:right-auto">
                 <p className="label">{wallet.mode === "browser" ? "Browser wallet" : wallet.mode === "injected" ? "Injected wallet" : "No wallet"}</p>
-                <p className={`mt-1 text-sm ${wallet.address ? "break-all font-mono" : "leading-6 text-[#5f574b]"}`}>{wallet.address ?? "Connect to create, report, and verify watches."}</p>
+                <p className={`mt-1 text-sm ${wallet.address ? "break-all font-mono" : "leading-6 text-[var(--muted)]"}`}>{wallet.address ?? "Connect to create, report, and verify watches."}</p>
                 <div className="mt-3 grid gap-2">
                   <button className="button-secondary" onClick={useInjectedWallet}>
                     <ShieldCheck size={16} /> Use injected
@@ -259,9 +280,9 @@ export function AppShell({ view, watchId, profileAddress }: Props) {
             ) : null}
             </div>
           </div>
-          <nav className="flex gap-1 overflow-x-auto border-t border-[#ded8cd] px-4 py-2 lg:hidden">
+          <nav className="flex gap-1 overflow-x-auto border-t border-[var(--border-soft)] px-4 py-2 lg:hidden">
             {nav.map(([label, href]) => (
-              <Link key={href} href={href} className={`shrink-0 px-3 py-2 text-sm font-bold ${isActive(view, href) ? "bg-[#d7fff2] text-[#075f58]" : "text-[#5f574b]"}`}>
+              <Link key={href} href={href} className={`shrink-0 px-3 py-2 text-sm font-bold ${isActive(view, href) ? "bg-[var(--primary-muted)] text-[var(--primary-muted-ink)]" : "text-[var(--muted)]"}`}>
                 {label}
               </Link>
             ))}
@@ -270,9 +291,9 @@ export function AppShell({ view, watchId, profileAddress }: Props) {
 
         <div>
       {wallet.needsAck ? (
-        <section className="border-b border-amber-300 bg-amber-50 px-4 py-3">
+        <section className="border-b border-[var(--warning)] bg-[var(--warning-bg)] px-4 py-3">
           <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-            <p className="text-sm text-amber-950">
+            <p className="text-sm text-[var(--ink)]">
               Browser wallets are stored only in this browser. Clearing site data destroys the key. Use export if you need to keep it.
             </p>
             <button className="button-secondary" onClick={useBrowserWallet}>Create browser wallet</button>
@@ -304,7 +325,7 @@ function isActive(view: View, href: string) {
 
 function ErrorBox({ message }: { message: string }) {
   return (
-    <div className="mb-4 flex items-start gap-3 border border-red-200 bg-red-50 p-4 text-red-950" role="alert">
+    <div className="mb-4 flex items-start gap-3 border border-[var(--danger)] bg-[var(--danger-bg)] p-4 text-[var(--ink)]" role="alert">
       <AlertTriangle size={20} />
       <p>{message}</p>
     </div>
@@ -314,17 +335,17 @@ function ErrorBox({ message }: { message: string }) {
 function PendingTransactions({ txs }: { txs: TrackedTx[] }) {
   if (!txs.length) return null;
   return (
-    <section className="mb-6 border-y border-[#ded8cd] bg-[#fffefd]">
-      <div className="flex items-center gap-3 border-b border-[#eee7dc] px-4 py-3">
+    <section className="mb-6 border-y border-[var(--border-soft)] bg-[var(--surface)]">
+      <div className="flex items-center gap-3 border-b border-[var(--border-muted)] px-4 py-3">
         <History size={18} />
         <h2 className="font-black uppercase tracking-wide">Transactions</h2>
       </div>
-      <div className="divide-y divide-[#eee7dc]">
+      <div className="divide-y divide-[var(--border-muted)]">
         {txs.slice(0, 4).map((tx) => (
           <div key={tx.hash} className="flex items-center justify-between px-4 py-3">
             <div>
               <p className="font-bold">{tx.label}</p>
-              <p className="text-sm text-[#766d61]">{tx.status} · {formatUtc(tx.submittedAt)}</p>
+              <p className="text-sm text-[var(--muted)]">{tx.status} · {formatUtc(tx.submittedAt)}</p>
             </div>
             <a className="button-secondary" href={`${explorerBase}/tx/${tx.hash}`} target="_blank" rel="noreferrer" aria-label="Open transaction">
               <ExternalLink size={16} />
@@ -342,11 +363,11 @@ function Overview({ watches, loading }: ShellBits) {
   const matched = watches.filter((w) => w.status === "MATCHED").length;
   return (
     <div className="grid gap-6">
-      <section className="grid gap-0 overflow-hidden border border-[#ded8cd] bg-[#fffefd] xl:grid-cols-[minmax(0,1fr)_22rem]">
-        <div className="border-b border-[#ded8cd] p-6 md:p-8 xl:border-b-0">
-          <p className="label text-[#0f766e]">Public recall bounties</p>
-          <h1 className="display mt-4 max-w-4xl text-5xl font-bold leading-[1.02] md:text-7xl">Find dangerous recalled products before someone buys them.</h1>
-          <p className="mt-5 max-w-2xl text-lg leading-8 text-[#4f473c]">
+      <section className="grid gap-0 overflow-hidden border border-[var(--border-soft)] bg-[var(--surface)] xl:grid-cols-[minmax(0,1fr)_22rem]">
+        <div className="border-b border-[var(--border-soft)] p-6 md:p-8 xl:border-b-0">
+          <p className="label text-[var(--primary-muted-ink)]">Public recall bounties</p>
+          <h1 className="display mt-4 max-w-4xl text-5xl font-bold leading-[1.02] md:text-6xl 2xl:text-7xl">Find dangerous recalled products before someone buys them.</h1>
+          <p className="mt-5 max-w-2xl text-lg leading-8 text-[var(--muted)]">
             Sponsors fund product safety watches. Scouts submit public product evidence and official recall sources. GenLayer validators fetch the pages and decide whether the product matches the recall.
           </p>
           <div className="mt-6 flex flex-wrap gap-3">
@@ -354,7 +375,7 @@ function Overview({ watches, loading }: ShellBits) {
             <Link className="button-secondary" href="/scout"><FileSearch size={18} /> Submit evidence</Link>
           </div>
         </div>
-        <div className="grid content-start divide-y divide-[#ded8cd]">
+        <div className="grid content-start divide-y divide-[var(--border-soft)]">
           <Metric label="Open bounties" value={loading ? "..." : String(open)} />
           <Metric label="Awaiting consensus" value={loading ? "..." : String(reported)} />
           <Metric label="Verified matches" value={loading ? "..." : String(matched)} />
@@ -379,7 +400,7 @@ type ShellBits = {
 
 function Metric({ label, value }: { label: string; value: string }) {
   return (
-    <div className="bg-[#faf7f0] p-5">
+    <div className="bg-[var(--surface-muted)] p-5">
       <p className="label">{label}</p>
       <p className="display mt-2 text-5xl font-bold">{value}</p>
     </div>
@@ -388,8 +409,8 @@ function Metric({ label, value }: { label: string; value: string }) {
 
 function WatchesView({ watches, loading, refresh }: ShellBits) {
   return (
-    <section className="border border-[#ded8cd] bg-[#fffefd]">
-      <div className="flex flex-col gap-3 border-b border-[#ded8cd] p-5 md:flex-row md:items-end md:justify-between">
+    <section className="border border-[var(--border-soft)] bg-[var(--surface)]">
+      <div className="flex flex-col gap-3 border-b border-[var(--border-soft)] p-5 md:flex-row md:items-end md:justify-between">
         <div>
           <p className="label">Public board</p>
           <h1 className="display mt-2 text-5xl font-bold">Recall watches</h1>
@@ -422,11 +443,11 @@ function SponsorView({ busy, getWriteClient, trackWrite }: ShellBits) {
     });
   }
   return (
-    <section className="grid gap-0 border border-[#ded8cd] bg-[#fffefd] lg:grid-cols-[20rem_minmax(0,1fr)]">
-      <div className="border-b border-[#ded8cd] bg-[#faf7f0] p-6 lg:border-b-0 lg:border-r">
+    <section className="grid gap-0 border border-[var(--border-soft)] bg-[var(--surface)] lg:grid-cols-[20rem_minmax(0,1fr)]">
+      <div className="border-b border-[var(--border-soft)] bg-[var(--surface-muted)] p-6 lg:border-b-0 lg:border-r">
       <p className="label">Sponsor</p>
       <h1 className="display mt-2 text-5xl font-bold leading-tight">Fund a recall watch</h1>
-      <p className="mt-4 text-sm leading-6 text-[#5f574b]">Create the bounty first. Evidence and consensus happen later, so nobody waits through a slow review while filling out this form.</p>
+      <p className="mt-4 text-sm leading-6 text-[var(--muted)]">Create the bounty first. Evidence and consensus happen later, so nobody waits through a slow review while filling out this form.</p>
       </div>
       <div className="grid gap-4 p-6">
         <Input label="Title" value={form.title} onChange={(title) => setForm({ ...form, title })} />
@@ -444,7 +465,7 @@ function SponsorView({ busy, getWriteClient, trackWrite }: ShellBits) {
 function ScoutView(props: ShellBits) {
   const open = props.watches.filter((w) => w.status === "OPEN" || w.status === "UNKNOWN");
   return (
-    <section className="border border-[#ded8cd] bg-[#fffefd] p-6">
+    <section className="border border-[var(--border-soft)] bg-[var(--surface)] p-6">
       <p className="label">Scout desk</p>
       <h1 className="display mt-2 text-5xl font-bold">Submit recall evidence</h1>
       <WatchesList watches={open} loading={props.loading} empty="No open watches are ready for scouts." action={(watch) => <SubmitBox watch={watch} {...props} />} />
@@ -466,7 +487,7 @@ function SubmitBox({ watch, busy, getWriteClient, trackWrite }: ShellBits & { wa
     });
   }
   return (
-    <div className="mt-4 grid gap-3 border-t border-[#eee7dc] pt-4">
+    <div className="mt-4 grid gap-3 border-t border-[var(--border-muted)] pt-4">
       <Input label="Product evidence URL" value={form.productUrl} onChange={(productUrl) => setForm({ ...form, productUrl })} />
       <Input label="Committed evidence hash" value={form.productHash} onChange={(productHash) => setForm({ ...form, productHash })} />
       <Input label="Official recall URL" value={form.recallUrl} onChange={(recallUrl) => setForm({ ...form, recallUrl })} />
@@ -481,10 +502,10 @@ function ReviewView(props: ShellBits) {
   const ready = props.watches.filter((w) => w.status === "REPORTED");
   const unknown = props.watches.filter((w) => w.status === "UNKNOWN");
   return (
-    <section className="border border-[#ded8cd] bg-[#fffefd] p-6">
+    <section className="border border-[var(--border-soft)] bg-[var(--surface)] p-6">
       <p className="label">Permissionless review</p>
       <h1 className="display mt-2 text-5xl font-bold">Consensus queue</h1>
-      <div className="mt-5 grid border border-[#ded8cd] md:grid-cols-3 md:divide-x md:divide-[#ded8cd]">
+      <div className="mt-5 grid border border-[var(--border-soft)] md:grid-cols-3 md:divide-x md:divide-[var(--border-soft)]">
         <Metric label="Ready" value={String(ready.length)} />
         <Metric label="Unknown" value={String(unknown.length)} />
         <Metric label="Consensus round" value="1 fetch round" />
@@ -515,7 +536,7 @@ function ReviewActions({ watch, busy, getWriteClient, trackWrite, activeAddress 
     });
   }
   return (
-    <div className="mt-4 flex flex-wrap gap-2 border-t border-[#eee7dc] pt-4">
+    <div className="mt-4 flex flex-wrap gap-2 border-t border-[var(--border-muted)] pt-4">
       <button className="button-primary" onClick={verify} disabled={Boolean(busy) || watch.status !== "REPORTED"}><ShieldCheck size={16} /> Verify</button>
       {isSponsor ? <button className="button-secondary" onClick={accept} disabled={Boolean(busy)}><Check size={16} /> Accept</button> : null}
       {isSponsor && watch.status === "UNKNOWN" ? <button className="button-secondary" onClick={unwind} disabled={Boolean(busy)}><History size={16} /> Unwind</button> : null}
@@ -525,7 +546,7 @@ function ReviewActions({ watch, busy, getWriteClient, trackWrite, activeAddress 
 
 function HistoryView({ watches, loading, refresh }: { watches: WatchRecord[]; loading: boolean; refresh: () => Promise<void> }) {
   return (
-    <section className="border border-[#ded8cd] bg-[#fffefd] p-6">
+    <section className="border border-[var(--border-soft)] bg-[var(--surface)] p-6">
       <div className="flex items-center justify-between">
         <h1 className="display text-4xl font-bold">Your watch history</h1>
         <button className="button-secondary" onClick={refresh}><RefreshCw size={16} /> Refresh</button>
@@ -539,10 +560,10 @@ function WatchDetail({ watch, loading, ...props }: ShellBits & { watch?: WatchRe
   if (loading) return <Skeleton />;
   if (!watch) return <section className="panel p-6"><h1 className="display text-4xl font-bold">Watch not found</h1></section>;
   return (
-    <section className="border border-[#ded8cd] bg-[#fffefd] p-6">
+    <section className="border border-[var(--border-soft)] bg-[var(--surface)] p-6">
       <p className="label">{watch.watch_id}</p>
       <h1 className="display mt-2 text-5xl font-bold">{watch.title}</h1>
-      <div className="mt-5 grid border border-[#ded8cd] md:grid-cols-3 md:divide-x md:divide-[#ded8cd]">
+      <div className="mt-5 grid border border-[var(--border-soft)] md:grid-cols-3 md:divide-x md:divide-[var(--border-soft)]">
         <Metric label="Status" value={watch.status} />
         <Metric label="Bounty" value={formatGen(watch.bounty)} />
         <Metric label="Attempts" value={watch.attempts} />
@@ -555,7 +576,7 @@ function WatchDetail({ watch, loading, ...props }: ShellBits & { watch?: WatchRe
         <Info label="Product URL" value={watch.product_url || "Not submitted"} external={watch.product_url} />
         <Info label="Recall URL" value={watch.recall_url || "Not submitted"} external={watch.recall_url} />
       </div>
-      <div className="mt-6 border-t border-[#eee7dc] pt-5">
+      <div className="mt-6 border-t border-[var(--border-muted)] pt-5">
         <p className="label">Consensus reasoning</p>
         <p className="mt-2 text-lg">{watch.reason || "No consensus decision yet."}</p>
       </div>
@@ -568,7 +589,7 @@ function ProfileView({ address, watches }: { address?: string; watches: WatchRec
   const lower = address?.toLowerCase();
   const scoped = lower ? watches.filter((w) => w.sponsor.toLowerCase() === lower || w.scout.toLowerCase() === lower) : [];
   return (
-    <section className="border border-[#ded8cd] bg-[#fffefd] p-6">
+    <section className="border border-[var(--border-soft)] bg-[var(--surface)] p-6">
       <p className="label">Profile</p>
       <h1 className="display mt-2 break-all text-4xl font-bold">{address}</h1>
       <WatchesList watches={scoped} loading={false} empty="No watches found for this address in the loaded page." />
@@ -578,21 +599,21 @@ function ProfileView({ address, watches }: { address?: string; watches: WatchRec
 
 function WatchesList({ watches, loading, empty, action }: { watches: WatchRecord[]; loading: boolean; empty: string; action?: (watch: WatchRecord) => React.ReactNode }) {
   if (loading) return <Skeleton />;
-  if (!watches.length) return <div className="mt-6 border border-dashed border-[#d2cabd] p-6 text-[#5f574b]">{empty}</div>;
+  if (!watches.length) return <div className="mt-6 border border-dashed border-[var(--border-soft)] p-6 text-[var(--muted)]">{empty}</div>;
   return (
-    <div className="mt-6 border-y border-[#ded8cd]">
+    <div className="mt-6 border-y border-[var(--border-soft)]">
       {watches.map((watch) => (
-        <article key={watch.watch_id} className="border-b border-[#eee7dc] bg-white last:border-b-0">
+        <article key={watch.watch_id} className="border-b border-[var(--border-muted)] bg-[var(--surface)] last:border-b-0">
           <div className="ledger-grid items-start gap-4 p-4">
-            <div className="font-mono text-sm font-bold text-[#766d61]">{watch.watch_id}<br />{formatGen(watch.bounty)}</div>
+            <div className="font-mono text-sm font-bold text-[var(--muted)]">{watch.watch_id}<br />{formatGen(watch.bounty)}</div>
             <div>
               <Link className="text-xl font-black hover:underline" href={`/watch/${watch.watch_id}`}>{watch.title}</Link>
-              <p className="mt-1 text-[#5f574b]">{watch.category}</p>
-              <p className="mt-2 max-w-3xl text-sm leading-6 text-[#5f574b]">{watch.criteria}</p>
+              <p className="mt-1 text-[var(--muted)]">{watch.category}</p>
+              <p className="mt-2 max-w-3xl text-sm leading-6 text-[var(--muted)]">{watch.criteria}</p>
             </div>
             <StatusBadge status={watch.status} />
           </div>
-          {action ? <div className="border-t border-[#eee7dc] px-4 pb-4">{action(watch)}</div> : null}
+          {action ? <div className="border-t border-[var(--border-muted)] px-4 pb-4">{action(watch)}</div> : null}
         </article>
       ))}
     </div>
@@ -600,7 +621,7 @@ function WatchesList({ watches, loading, empty, action }: { watches: WatchRecord
 }
 
 function StatusBadge({ status }: { status: string }) {
-  const tone = status === "MATCHED" ? "border-emerald-200 bg-emerald-50 text-emerald-800" : status === "UNKNOWN" ? "border-amber-200 bg-amber-50 text-amber-900" : status === "REJECTED" ? "border-red-200 bg-red-50 text-red-800" : "border-[#d2cabd] bg-[#faf7f0] text-[#4f473c]";
+  const tone = status === "MATCHED" ? "border-[var(--success)] bg-[var(--success-bg)] text-[var(--success)]" : status === "UNKNOWN" ? "border-[var(--warning)] bg-[var(--warning-bg)] text-[var(--warning)]" : status === "REJECTED" || status === "CANCELED" ? "border-[var(--danger)] bg-[var(--danger-bg)] text-[var(--danger)]" : "border-[var(--border-soft)] bg-[var(--surface-muted)] text-[var(--ink)]";
   return <span className={`inline-flex w-fit justify-self-start border px-3 py-2 text-sm font-black md:justify-self-end ${tone}`}>{status}</span>;
 }
 
@@ -615,15 +636,15 @@ function Textarea({ label, value, onChange }: { label: string; value: string; on
 function Info({ label, value, href, external }: { label: string; value: string; href?: string; external?: string }) {
   const body = <p className="mt-1 break-all font-mono text-sm">{value}</p>;
   return (
-    <div className="border border-[#eee7dc] p-4">
+    <div className="border border-[var(--border-muted)] p-4">
       <p className="label">{label}</p>
-      {href ? <Link className="text-[#0f766e] hover:underline" href={href}>{body}</Link> : external ? <a className="text-[#0f766e] hover:underline" href={external} target="_blank" rel="noreferrer">{body}</a> : body}
+      {href ? <Link className="text-[var(--primary-muted-ink)] hover:underline" href={href}>{body}</Link> : external ? <a className="text-[var(--primary-muted-ink)] hover:underline" href={external} target="_blank" rel="noreferrer">{body}</a> : body}
     </div>
   );
 }
 
 function Skeleton() {
-  return <div className="mt-6 grid gap-3"><div className="h-24 animate-pulse bg-[#eee7dc]" /><div className="h-24 animate-pulse bg-[#eee7dc]" /></div>;
+  return <div className="mt-6 grid gap-3"><div className="h-24 animate-pulse bg-[var(--border-muted)]" /><div className="h-24 animate-pulse bg-[var(--border-muted)]" /></div>;
 }
 
 function readableError(err: unknown) {
