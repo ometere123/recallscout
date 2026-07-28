@@ -37,11 +37,8 @@ import {
   acknowledgeBrowserWallet,
   hasAcknowledgedBrowserWallet,
   loadPrivateKey,
-  loadTransactions,
   savePrivateKey,
   sortWatches,
-  updateTx,
-  upsertTx,
   type TrackedTx,
 } from "@/lib/storage";
 import { formatGen, formatUtc, localInputToUtc, parseGen, shortAddress } from "@/lib/format";
@@ -138,7 +135,6 @@ export function AppShell({ view, watchId, profileAddress }: Props) {
       } else {
         setWallet((current) => ({ ...current, ready: true, needsAck: !hasAcknowledgedBrowserWallet() }));
       }
-      setTxs(loadTransactions());
       void refresh();
     }, 0);
   }, [refresh]);
@@ -165,15 +161,14 @@ export function AppShell({ view, watchId, profileAddress }: Props) {
     try {
       const hash = await write();
       const tx: TrackedTx = { hash, label, target, submittedAt: new Date().toISOString(), desired: "ACCEPTED", status: "PENDING" };
-      upsertTx(tx);
-      setTxs(loadTransactions());
+      setTxs((current) => [tx, ...current.filter((item) => item.hash !== hash)].slice(0, 4));
       const client = makeReadClient();
       await client.waitForTransactionReceipt({ hash: hash as Hash, status: TransactionStatus.ACCEPTED, interval: 5000, retries: 90 });
-      updateTx(hash, { status: "ACCEPTED" });
-      setTxs(loadTransactions());
+      setTxs((current) => current.filter((item) => item.hash !== hash));
       void refresh();
     } catch (err) {
       setError(readableError(err));
+      setTxs((current) => current.filter((tx) => tx.label !== label || tx.target !== target));
     } finally {
       setBusy("");
     }
