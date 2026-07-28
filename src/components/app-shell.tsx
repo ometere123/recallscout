@@ -81,7 +81,7 @@ const nav = [
   ["Sponsor", "/sponsor"],
   ["Scout Desk", "/scout"],
   ["Review", "/review"],
-  ["History", "/history"],
+  ["My Watches", "/my-watches"],
 ] as const;
 
 export function AppShell({ view, watchId, profileAddress }: Props) {
@@ -352,16 +352,19 @@ function ErrorBox({ message }: { message: string }) {
   );
 }
 
+const terminalTxStatuses = new Set(["ACCEPTED", "FINALIZED", "CANCELED"]);
+
 function PendingTransactions({ txs }: { txs: TrackedTx[] }) {
-  if (!txs.length) return null;
+  const active = txs.filter((tx) => !terminalTxStatuses.has(tx.status));
+  if (!active.length) return null;
   return (
     <section className="mb-6 border-y border-[var(--border-soft)] bg-[var(--surface)]">
       <div className="flex items-center gap-3 border-b border-[var(--border-muted)] px-4 py-3">
         <History size={18} />
-        <h2 className="font-black uppercase tracking-wide">Transactions</h2>
+        <h2 className="font-black uppercase tracking-wide">Active transactions</h2>
       </div>
       <div className="divide-y divide-[var(--border-muted)]">
-        {txs.slice(0, 4).map((tx) => (
+        {active.slice(0, 4).map((tx) => (
           <div key={tx.hash} className="flex items-center justify-between px-4 py-3">
             <div>
               <p className="font-bold">{tx.label}</p>
@@ -588,12 +591,12 @@ function ReviewActions({ watch, busy, getWriteClient, trackWrite, activeAddress 
 
 function HistoryView({ watches, loading, refresh, activeAddress }: { watches: WatchRecord[]; loading: boolean; refresh: () => Promise<void>; activeAddress?: string }) {
   const emptyCopy = activeAddress
-    ? "No watch history yet. This wallet has not sponsored or submitted any recall watches."
-    : "Connect the wallet used as sponsor or scout to see your history.";
+    ? "No watches yet. This wallet has not sponsored or submitted any recall watches."
+    : "Connect the wallet used as sponsor or scout to see your watches.";
   return (
     <section className="border border-[var(--border-soft)] bg-[var(--surface)] p-5">
       <div className="flex items-center justify-between">
-        <h1 className="display text-3xl font-bold">Your watch history</h1>
+        <h1 className="display text-3xl font-bold">My Watches</h1>
         <button className="button-secondary" onClick={refresh}><RefreshCw size={16} /> Refresh</button>
       </div>
       <WatchesList watches={watches} loading={loading} empty={emptyCopy} />
