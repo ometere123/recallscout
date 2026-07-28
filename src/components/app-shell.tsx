@@ -35,7 +35,6 @@ import {
 } from "@/lib/genlayer";
 import {
   acknowledgeBrowserWallet,
-  clearPrivateKey,
   hasAcknowledgedBrowserWallet,
   loadPrivateKey,
   loadTransactions,
@@ -182,6 +181,12 @@ export function AppShell({ view, watchId, profileAddress }: Props) {
 
   function useBrowserWallet() {
     acknowledgeBrowserWallet();
+    const stored = loadPrivateKey();
+    if (stored) {
+      const client = makeLocalWriteClient(stored);
+      setWallet({ ready: true, mode: "browser", address: client.account?.address as Address, privateKey: stored, menuOpen: false, needsAck: false, importValue: "" });
+      return;
+    }
     const { privateKey, account } = makeGeneratedWallet();
     savePrivateKey(privateKey);
     setWallet({ ready: true, mode: "browser", address: account.address as Address, privateKey, menuOpen: false, needsAck: false, importValue: "" });
@@ -214,7 +219,6 @@ export function AppShell({ view, watchId, profileAddress }: Props) {
   }
 
   function disconnectWallet() {
-    if (wallet.mode === "browser") clearPrivateKey();
     setWallet({ ready: true, mode: "none", menuOpen: false, needsAck: false, importValue: "" });
   }
 
