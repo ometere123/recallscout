@@ -23,9 +23,12 @@ export function formatUtc(value?: string) {
   const date = new Date(normalized);
   if (Number.isNaN(date.getTime())) return value;
   return new Intl.DateTimeFormat("en", {
-    dateStyle: "medium",
-    timeStyle: "short",
     timeZoneName: "short",
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
   }).format(date);
 }
 
