@@ -22,9 +22,9 @@ There is no backend service, database, or API route storing state.
 
 Contract: `contracts/recall_scout.py`
 
-StudioNet address: `0xeb93Bc26cd7fB3abf112a30509B1247c1B2b8b2c`
+StudioNet address: `0xf2efDB37BEDC1018a1A80083aF14Dd4114A526cb`
 
-Explorer: `https://explorer-studio.genlayer.com/address/0xeb93Bc26cd7fB3abf112a30509B1247c1B2b8b2c`
+Explorer: `https://explorer-studio.genlayer.com/address/0xf2efDB37BEDC1018a1A80083aF14Dd4114A526cb`
 
 The slow semantic step is `verify_report(watch_id)`. It fetches:
 
@@ -86,7 +86,8 @@ On-chain writes exercised:
 
 Selected transaction hashes:
 
-- Deploy: `0xc8dee5d1ead5bf1a764ca084c753063a806b66839c77b60f0bd938e54148313c`
+- Fresh demo deploy: `0xe505f0ae5dccba60c87344862403eb6d5d3f9c76dc5022efd6cf61335331d76c`
+- Original exercised deploy: `0xc8dee5d1ead5bf1a764ca084c753063a806b66839c77b60f0bd938e54148313c`
 - Submit sponsor-accepted report: `0x14aafc1d57ade4aee7757282149c8923d457d5fcdffeece154bf3a533d528f9e`
 - Sponsor accept: `0x376fc72d5201f9e0977f33c3b9fce392488e522a7539b03d79c9e8bfa9b0a61e`
 - Cancel expired watch: `0x25021c314fff5a6a8cfd4819353566a0e7fc58f82a4a2f5bf32f4dfb81c19f79`
@@ -122,7 +123,7 @@ Optional env vars:
 
 ```bash
 NEXT_PUBLIC_GENLAYER_CHAIN=studionet
-NEXT_PUBLIC_RECALLSCOUT_ADDRESS=0xeb93Bc26cd7fB3abf112a30509B1247c1B2b8b2c
+NEXT_PUBLIC_RECALLSCOUT_ADDRESS=0xf2efDB37BEDC1018a1A80083aF14Dd4114A526cb
 NEXT_PUBLIC_GENLAYER_EXPLORER=https://explorer-studio.genlayer.com
 ```
 

@@ -3,7 +3,7 @@ import { createAccount, createClient, generatePrivateKey } from "genlayer-js";
 import { studionet } from "genlayer-js/chains";
 import { TransactionStatus } from "genlayer-js/types";
 
-const address = process.env.NEXT_PUBLIC_RECALLSCOUT_ADDRESS ?? "0xeb93Bc26cd7fB3abf112a30509B1247c1B2b8b2c";
+const address = process.env.NEXT_PUBLIC_RECALLSCOUT_ADDRESS ?? "0xf2efDB37BEDC1018a1A80083aF14Dd4114A526cb";
 const sponsorAccount = createAccount(generatePrivateKey());
 const scoutAccount = createAccount(generatePrivateKey());
 const reviewerAccount = createAccount(generatePrivateKey());

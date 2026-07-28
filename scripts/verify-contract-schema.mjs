@@ -4,7 +4,7 @@ import { studionet, localnet, testnetAsimov, testnetBradbury } from "genlayer-js
 const chainName = process.env.NEXT_PUBLIC_GENLAYER_CHAIN ?? "studionet";
 const chains = { studionet, localnet, testnetAsimov, testnetBradbury };
 const chain = chains[chainName] ?? studionet;
-const address = process.env.NEXT_PUBLIC_RECALLSCOUT_ADDRESS ?? "0xeb93Bc26cd7fB3abf112a30509B1247c1B2b8b2c";
+const address = process.env.NEXT_PUBLIC_RECALLSCOUT_ADDRESS ?? "0xf2efDB37BEDC1018a1A80083aF14Dd4114A526cb";
 
 const required = [
   "get_watch_count",
