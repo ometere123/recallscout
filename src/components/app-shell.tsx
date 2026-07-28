@@ -152,7 +152,11 @@ export function AppShell({ view, watchId, profileAddress }: Props) {
   async function getWriteClient() {
     if (!wallet.address) throw new Error("EXPECTED: connect a wallet before writing.");
     if (wallet.mode === "browser" && wallet.privateKey) return makeLocalWriteClient(wallet.privateKey);
-    if (wallet.mode === "injected") return makeInjectedWriteClient(wallet.address);
+    if (wallet.mode === "injected") {
+      const provider = typeof window !== "undefined" ? window.ethereum : undefined;
+      if (!provider) throw new Error("EXPECTED: injected wallet provider is no longer available.");
+      return makeInjectedWriteClient(wallet.address, provider);
+    }
     throw new Error("EXPECTED: wallet is not ready.");
   }
 

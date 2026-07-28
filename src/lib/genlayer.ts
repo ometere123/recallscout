@@ -1,7 +1,7 @@
 import { createAccount, createClient, generatePrivateKey } from "genlayer-js";
 import { localnet, studionet, testnetAsimov, testnetBradbury } from "genlayer-js/chains";
 import type { Address } from "viem";
-import type { CalldataEncodable, Network } from "genlayer-js/types";
+import type { CalldataEncodable } from "genlayer-js/types";
 
 export const CHAIN_NAME = process.env.NEXT_PUBLIC_GENLAYER_CHAIN ?? "studionet";
 
@@ -31,10 +31,12 @@ export function makeLocalWriteClient(privateKey: `0x${string}`) {
   return createClient({ chain, endpoint: rpcEndpoint, account: createAccount(privateKey) });
 }
 
-export async function makeInjectedWriteClient(address: Address) {
-  const client = createClient({ chain, endpoint: rpcEndpoint, account: address });
-  await client.connect(CHAIN_NAME as Network);
-  return client;
+type InjectedProvider = {
+  request: (args: { method: string; params?: unknown[] }) => Promise<unknown>;
+};
+
+export function makeInjectedWriteClient(address: Address, provider: InjectedProvider) {
+  return createClient({ chain, endpoint: rpcEndpoint, account: address, provider });
 }
 
 export type WatchStatus = "OPEN" | "REPORTED" | "MATCHED" | "REJECTED" | "UNKNOWN" | "CANCELED" | "UNWOUND";
