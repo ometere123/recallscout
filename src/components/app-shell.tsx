@@ -603,6 +603,7 @@ function HistoryView({ watches, loading, refresh, activeAddress }: { watches: Wa
 function WatchDetail({ watch, loading, ...props }: ShellBits & { watch?: WatchRecord }) {
   if (loading) return <Skeleton />;
   if (!watch) return <section className="panel p-5"><h1 className="display text-3xl font-bold">Watch not found</h1></section>;
+  const canSubmit = watch.status === "OPEN" || watch.status === "UNKNOWN";
   return (
     <section className="border border-[var(--border-soft)] bg-[var(--surface)] p-5">
       <p className="label">{watch.watch_id}</p>
@@ -624,6 +625,13 @@ function WatchDetail({ watch, loading, ...props }: ShellBits & { watch?: WatchRe
         <p className="label">Consensus reasoning</p>
         <p className="mt-2 text-base">{watch.reason || "No consensus decision yet."}</p>
       </div>
+      {canSubmit ? (
+        <div className="mt-6 border-t border-[var(--border-muted)] pt-5">
+          <p className="label">Scout action</p>
+          <h2 className="display mt-2 text-2xl font-bold">Submit evidence for this watch</h2>
+          <SubmitBox watch={watch} loading={loading} {...props} />
+        </div>
+      ) : null}
       <ReviewActions watch={watch} loading={loading} {...props} />
     </section>
   );
