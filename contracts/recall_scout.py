@@ -56,10 +56,31 @@ class Watch:
     decided_at: str
     last_review_at: str
     attempts: u256
+    active_attempt_id: str
     decision: str
     confidence_band: str
     reason: str
     released_to: Address
+
+
+@allow_storage
+@dataclass
+class ReportAttempt:
+    attempt_id: str
+    watch_id: str
+    scout: Address
+    bond: u256
+    product_url: str
+    product_hash: str
+    recall_url: str
+    source_name: str
+    corroborating_url: str
+    reported_at: str
+    reviewed_at: str
+    decision: str
+    confidence_band: str
+    reason: str
+    settled: bool
 
 
 @allow_storage
@@ -88,6 +109,8 @@ class RecallScout(gl.Contract):
     watch_count: u256
     watches: TreeMap[str, Watch]
     watch_ids: DynArray[str]
+    report_attempts: TreeMap[str, ReportAttempt]
+    attempts_by_watch: TreeMap[str, DynArray[str]]
     by_party: TreeMap[str, DynArray[str]]
     profiles: TreeMap[str, Profile]
 
@@ -186,6 +209,7 @@ class RecallScout(gl.Contract):
             decided_at="",
             last_review_at="",
             attempts=u256(0),
+            active_attempt_id="",
             decision="",
             confidence_band="",
             reason="",
@@ -209,42 +233,75 @@ class RecallScout(gl.Contract):
         if watch.deadline_at != "" and self._deadline_reached(watch.deadline_at, self._now()):
             raise gl.vm.UserError(f"{ERROR_EXPECTED} Watch deadline has passed")
         scout = gl.message.sender_address
-        if watch.scout != Address("0x0000000000000000000000000000000000000000") and watch.scout != scout:
-            self._append_party(scout, watch_id)
-        if watch.scout == Address("0x0000000000000000000000000000000000000000"):
+        previous_refund_scout = Address("0x0000000000000000000000000000000000000000")
+        previous_refund_bond = u256(0)
+        if watch.status == STATUS_UNKNOWN and watch.active_attempt_id != "":
+            previous = self.report_attempts[watch.active_attempt_id]
+            if not previous.settled:
+                previous.settled = True
+                previous.reason = "Replaced by a later report after an inconclusive review; bond returned to the original scout."
+                self.report_attempts[previous.attempt_id] = previous
+                previous_refund_scout = previous.scout
+                previous_refund_bond = previous.bond
+        if not self._party_has_watch(scout, watch_id):
             self._append_party(scout, watch_id)
         watch.scout = scout
         watch.product_url = self._clean_url(product_url, "product URL")
         watch.product_hash = self._clean_hash(product_hash)
-        watch.recall_url = self._clean_url(recall_url, "recall URL")
         watch.source_name = self._clean_text(source_name, MAX_SOURCE_NAME, "source name")
+        watch.recall_url = self._clean_recall_url(recall_url, watch.source_name)
         watch.corroborating_url = self._clean_optional_url(corroborating_url)
-        watch.scout_bond = watch.scout_bond + u256(gl.message.value)
+        watch.scout_bond = u256(gl.message.value)
         watch.status = STATUS_REPORTED
         watch.reported_at = self._now()
+        next_attempt_number = u256(len(self.attempts_by_watch.get_or_insert_default(watch_id))) + u256(1)
+        attempt_id = watch_id + "-A" + str(next_attempt_number)
+        watch.active_attempt_id = attempt_id
         watch.decision = ""
         watch.confidence_band = ""
         watch.reason = ""
+        self.report_attempts[attempt_id] = ReportAttempt(
+            attempt_id=attempt_id,
+            watch_id=watch_id,
+            scout=scout,
+            bond=u256(gl.message.value),
+            product_url=watch.product_url,
+            product_hash=watch.product_hash,
+            recall_url=watch.recall_url,
+            source_name=watch.source_name,
+            corroborating_url=watch.corroborating_url,
+            reported_at=watch.reported_at,
+            reviewed_at="",
+            decision="",
+            confidence_band="",
+            reason="",
+            settled=False,
+        )
+        self.attempts_by_watch[watch_id].append(attempt_id)
         self.watches[watch_id] = watch
         self._bump(scout, "reported")
+        self._pay(previous_refund_scout, previous_refund_bond)
 
     @gl.public.write
     def verify_report(self, watch_id: str) -> None:
         watch = self._load_watch(watch_id)
         if watch.status != STATUS_REPORTED:
             raise gl.vm.UserError(f"{ERROR_EXPECTED} Watch is not ready for consensus")
+        if watch.active_attempt_id == "":
+            raise gl.vm.UserError(f"{ERROR_EXPECTED} Report attempt not found")
         if self._remaining_cooldown(watch.last_review_at, self._now()) > 0:
             raise gl.vm.UserError(f"{ERROR_EXPECTED} Review cooldown active")
+        attempt = self.report_attempts[watch.active_attempt_id]
         result = self._consensus_match(
             watch.title,
             watch.category,
             watch.criteria,
             watch.source_hint,
-            watch.product_url,
-            watch.product_hash,
-            watch.recall_url,
-            watch.source_name,
-            watch.corroborating_url,
+            attempt.product_url,
+            attempt.product_hash,
+            attempt.recall_url,
+            attempt.source_name,
+            attempt.corroborating_url,
         )
         decision = str(result.get("decision", STATUS_UNKNOWN))
         reason = self._bounded(str(result.get("reason", "")), MAX_REASON)
@@ -255,22 +312,31 @@ class RecallScout(gl.Contract):
         watch.decision = decision
         watch.reason = reason
         watch.confidence_band = confidence
+        attempt.reviewed_at = watch.last_review_at
+        attempt.decision = decision
+        attempt.reason = reason
+        attempt.confidence_band = confidence
         if decision == "MATCH":
             watch.status = STATUS_MATCHED
-            watch.released_to = watch.scout
+            watch.released_to = attempt.scout
+            attempt.settled = True
+            self.report_attempts[attempt.attempt_id] = attempt
             self.watches[watch_id] = watch
-            self._bump(watch.scout, "matched")
-            self._pay(watch.scout, watch.bounty + watch.scout_bond)
+            self._bump(attempt.scout, "matched")
+            self._pay(attempt.scout, watch.bounty + attempt.bond)
         elif decision == "NO_MATCH":
             watch.status = STATUS_REJECTED
             watch.released_to = watch.sponsor
+            attempt.settled = True
+            self.report_attempts[attempt.attempt_id] = attempt
             self.watches[watch_id] = watch
-            self._bump(watch.scout, "rejected")
-            self._pay(watch.sponsor, watch.bounty + watch.scout_bond)
+            self._bump(attempt.scout, "rejected")
+            self._pay(watch.sponsor, watch.bounty + attempt.bond)
         else:
             watch.status = STATUS_UNKNOWN
+            self.report_attempts[attempt.attempt_id] = attempt
             self.watches[watch_id] = watch
-            self._bump(watch.scout, "unknown")
+            self._bump(attempt.scout, "unknown")
 
     @gl.public.write
     def sponsor_accept(self, watch_id: str) -> None:
@@ -279,14 +345,23 @@ class RecallScout(gl.Contract):
             raise gl.vm.UserError(f"{ERROR_EXPECTED} Only sponsor can accept")
         if watch.status != STATUS_REPORTED and watch.status != STATUS_UNKNOWN:
             raise gl.vm.UserError(f"{ERROR_EXPECTED} Watch cannot be accepted now")
+        if watch.active_attempt_id == "":
+            raise gl.vm.UserError(f"{ERROR_EXPECTED} Report attempt not found")
+        attempt = self.report_attempts[watch.active_attempt_id]
         watch.status = STATUS_MATCHED
         watch.decision = "SPONSOR_ACCEPTED"
         watch.reason = "Sponsor accepted the recall match without consensus."
         watch.decided_at = self._now()
-        watch.released_to = watch.scout
+        watch.released_to = attempt.scout
+        attempt.reviewed_at = watch.decided_at
+        attempt.decision = watch.decision
+        attempt.reason = watch.reason
+        attempt.confidence_band = "SPONSOR"
+        attempt.settled = True
+        self.report_attempts[attempt.attempt_id] = attempt
         self.watches[watch_id] = watch
-        self._bump(watch.scout, "matched")
-        self._pay(watch.scout, watch.bounty + watch.scout_bond)
+        self._bump(attempt.scout, "matched")
+        self._pay(attempt.scout, watch.bounty + attempt.bond)
 
     @gl.public.write
     def cancel_open_watch(self, watch_id: str) -> None:
@@ -322,10 +397,22 @@ class RecallScout(gl.Contract):
         watch.reason = "Sponsor unwound an unresolved report after bounded consensus attempts."
         watch.decided_at = self._now()
         watch.released_to = watch.sponsor
+        attempt_bond = u256(0)
+        attempt_scout = Address("0x0000000000000000000000000000000000000000")
+        if watch.active_attempt_id != "":
+            attempt = self.report_attempts[watch.active_attempt_id]
+            if not attempt.settled:
+                attempt.settled = True
+                attempt.decision = watch.decision
+                attempt.reason = "Unknown report unwound; active scout bond returned to its owner."
+                attempt.reviewed_at = watch.decided_at
+                self.report_attempts[attempt.attempt_id] = attempt
+                attempt_bond = attempt.bond
+                attempt_scout = attempt.scout
         self.watches[watch_id] = watch
         self._bump(watch.sponsor, "recovered")
         self._pay(watch.sponsor, watch.bounty)
-        self._pay(watch.scout, watch.scout_bond)
+        self._pay(attempt_scout, attempt_bond)
 
     def _consensus_match(self, title: str, category: str, criteria: str, source_hint: str, product_url: str, product_hash: str, recall_url: str, source_name: str, corroborating_url: str) -> dict:
         def leader():
@@ -417,6 +504,25 @@ class RecallScout(gl.Contract):
             raise gl.vm.UserError(f"{ERROR_EXPECTED} {field} must start with https://")
         return clean
 
+    def _clean_recall_url(self, value: str, source_name: str) -> str:
+        clean = self._clean_url(value, "recall URL")
+        lower = clean.lower()
+        source = source_name.lower()
+        official = False
+        if "cpsc" in source and (lower.startswith("https://www.cpsc.gov/") or lower.startswith("https://cpsc.gov/")):
+            official = True
+        elif "fda" in source and (lower.startswith("https://www.fda.gov/") or lower.startswith("https://fda.gov/")):
+            official = True
+        elif "usda" in source and (lower.startswith("https://www.fsis.usda.gov/") or lower.startswith("https://fsis.usda.gov/") or lower.startswith("https://www.usda.gov/") or lower.startswith("https://usda.gov/")):
+            official = True
+        elif ("nhtsa" in source or "safercar" in source) and (lower.startswith("https://www.nhtsa.gov/") or lower.startswith("https://nhtsa.gov/") or lower.startswith("https://www.safercar.gov/") or lower.startswith("https://safercar.gov/")):
+            official = True
+        elif "health canada" in source and (lower.startswith("https://recalls-rappels.canada.ca/") or lower.startswith("https://www.recalls-rappels.canada.ca/")):
+            official = True
+        if not official:
+            raise gl.vm.UserError(f"{ERROR_EXPECTED} Recall URL must match the declared official recall source")
+        return clean
+
     def _clean_optional_url(self, value: str) -> str:
         clean = self._bounded(value.strip(), MAX_URL)
         if clean == "":
@@ -466,6 +572,18 @@ class RecallScout(gl.Contract):
     def _append_party(self, party: Address, watch_id: str) -> None:
         ids = self.by_party.get_or_insert_default(self._address_key(party))
         ids.append(watch_id)
+
+    def _party_has_watch(self, party: Address, watch_id: str) -> bool:
+        key = self._address_key(party)
+        if key not in self.by_party:
+            return False
+        ids = self.by_party[key]
+        idx = u256(0)
+        while idx < len(ids):
+            if ids[idx] == watch_id:
+                return True
+            idx = idx + u256(1)
+        return False
 
     def _pay(self, recipient: Address, amount: u256) -> None:
         if amount > u256(0):
@@ -539,6 +657,7 @@ class RecallScout(gl.Contract):
             "decided_at": w.decided_at,
             "last_review_at": w.last_review_at,
             "attempts": str(w.attempts),
+            "active_attempt_id": w.active_attempt_id,
             "decision": w.decision,
             "confidence_band": w.confidence_band,
             "reason": w.reason,

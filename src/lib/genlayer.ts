@@ -14,7 +14,7 @@ const CHAINS = {
 
 export const chain = CHAINS[CHAIN_NAME as keyof typeof CHAINS] ?? studionet;
 export const contractAddress = (process.env.NEXT_PUBLIC_RECALLSCOUT_ADDRESS ??
-  "0xf2efDB37BEDC1018a1A80083aF14Dd4114A526cb") as Address;
+  "0x9434722c6E747E31e4e5BdFbcc458aF6b2DA8360") as Address;
 export const explorerBase = process.env.NEXT_PUBLIC_GENLAYER_EXPLORER ?? "https://explorer-studio.genlayer.com";
 export const rpcEndpoint = process.env.NEXT_PUBLIC_GENLAYER_RPC_ENDPOINT ?? "/api/genlayer-rpc";
 
@@ -63,6 +63,7 @@ export type WatchRecord = {
   decided_at: string;
   last_review_at: string;
   attempts: string;
+  active_attempt_id: string;
   decision: string;
   confidence_band: string;
   reason: string;

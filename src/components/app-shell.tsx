@@ -619,6 +619,7 @@ function WatchDetail({ watch, loading, ...props }: ShellBits & { watch?: WatchRe
         <Info label="Scout" value={watch.scout === zeroAddress ? "No scout yet" : watch.scout} href={watch.scout === zeroAddress ? undefined : `/profile/${watch.scout}`} />
         <Info label="Created" value={formatUtc(watch.created_at)} />
         <Info label="Deadline" value={formatUtc(watch.deadline_at)} />
+        <Info label="Active attempt" value={watch.active_attempt_id || "No report attempt yet"} />
         <Info label="Product URL" value={watch.product_url || "Not submitted"} external={watch.product_url} />
         <Info label="Recall URL" value={watch.recall_url || "Not submitted"} external={watch.recall_url} />
       </div>

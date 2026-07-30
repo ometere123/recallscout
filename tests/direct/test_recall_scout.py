@@ -153,6 +153,15 @@ def test_submit_rejects_non_https(direct_vm, deploy_recall, direct_alice, direct
     direct_vm.value = 0
 
 
+def test_submit_rejects_recall_url_outside_declared_source(direct_vm, deploy_recall, direct_alice, direct_bob):
+    watch_id = create_watch(direct_vm, deploy_recall, direct_alice)
+    direct_vm.sender = direct_bob
+    direct_vm.value = BOND
+    with direct_vm.expect_revert("declared official recall source"):
+        deploy_recall.submit_report(watch_id, "https://shop.example.test/dresser", GOOD_HASH, "https://example.com/recall", "CPSC", "")
+    direct_vm.value = 0
+
+
 def test_submit_rejects_bad_hash(direct_vm, deploy_recall, direct_alice, direct_bob):
     watch_id = create_watch(direct_vm, deploy_recall, direct_alice)
     direct_vm.sender = direct_bob
@@ -244,6 +253,54 @@ def test_cooldown_exact_boundary_allows_retry(direct_vm, deploy_recall, direct_a
     warp_to(direct_vm, "2026-07-28T10:05:00Z")
     deploy_recall.verify_report(watch_id)
     assert deploy_recall.get_watch(watch_id)["attempts"] == "2"
+
+
+def test_cross_scout_retry_does_not_pool_previous_bond(direct_vm, deploy_recall, direct_alice, direct_bob, direct_charlie):
+    warp_to(direct_vm, "2026-07-28T10:00:00Z")
+    watch_id = create_watch(direct_vm, deploy_recall, direct_alice)
+    submit_report(direct_vm, deploy_recall, direct_bob, watch_id)
+    mock_match(direct_vm, "UNKNOWN", "LOW")
+    deploy_recall.verify_report(watch_id)
+
+    submit_report(direct_vm, deploy_recall, direct_charlie, watch_id, product="https://shop.example.test/romorgniz-dresser")
+    watch = deploy_recall.get_watch(watch_id)
+    assert watch["status"] == "REPORTED"
+    assert watch["scout"].lower() == str(direct_charlie).lower()
+    assert watch["scout_bond"] == str(BOND)
+    assert watch["active_attempt_id"] == "RS-1-A2"
+
+    warp_to(direct_vm, "2026-07-28T10:05:00Z")
+    direct_vm.clear_mocks()
+    mock_match(direct_vm, "MATCH", "HIGH")
+    deploy_recall.verify_report(watch_id)
+    settled = deploy_recall.get_watch(watch_id)
+    assert settled["status"] == "MATCHED"
+    assert settled["released_to"].lower() == str(direct_charlie).lower()
+    assert settled["scout_bond"] == str(BOND)
+    assert deploy_recall.get_profile(direct_bob)["unknown"] == "1"
+    assert deploy_recall.get_profile(direct_charlie)["matched"] == "1"
+
+
+def test_cross_scout_unknown_unwind_returns_only_active_scout_bond(direct_vm, deploy_recall, direct_alice, direct_bob, direct_charlie):
+    warp_to(direct_vm, "2026-07-28T10:00:00Z")
+    watch_id = create_watch(direct_vm, deploy_recall, direct_alice)
+    submit_report(direct_vm, deploy_recall, direct_bob, watch_id)
+    mock_match(direct_vm, "UNKNOWN", "LOW")
+    deploy_recall.verify_report(watch_id)
+
+    submit_report(direct_vm, deploy_recall, direct_charlie, watch_id, product="https://shop.example.test/second-dresser")
+    warp_to(direct_vm, "2026-07-28T10:05:00Z")
+    mock_match(direct_vm, "UNKNOWN", "LOW")
+    deploy_recall.verify_report(watch_id)
+    warp_to(direct_vm, "2026-07-28T10:10:00Z")
+    direct_vm.sender = direct_alice
+    deploy_recall.unwind_unknown(watch_id)
+
+    watch = deploy_recall.get_watch(watch_id)
+    assert watch["status"] == "UNWOUND"
+    assert watch["released_to"].lower() == str(direct_alice).lower()
+    assert watch["scout"].lower() == str(direct_charlie).lower()
+    assert watch["scout_bond"] == str(BOND)
 
 
 def test_sponsor_accept_pays_scout_branch(direct_vm, deploy_recall, direct_alice, direct_bob):
